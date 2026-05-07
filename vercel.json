@@ -1,0 +1,8 @@
+{
+  "buildCommand": "pnpm build",
+  "installCommand": "pnpm install",
+  "framework": "nextjs",
+  "env": {
+    "PERFECT_CORP_API_KEY": "@perfect_corp_api_key"
+  }
+}
