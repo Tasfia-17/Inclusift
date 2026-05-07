@@ -111,10 +111,29 @@ function TryOnContent() {
                   <svg width="14" height="14" viewBox="0 0 14 14"><circle cx="7" cy="7" r="7" fill="#22c55e"/><path d="M4 7l2 2 4-4" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
                   Try-on complete
                 </div>
-                <img src={result} alt="Try-on result" style={{ width:'100%', borderRadius:12 }} />
-                <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8, marginTop:12 }}>
-                  <a href={result} download className="btn-ghost" style={{ justifyContent:'center', fontSize:13, padding:'8px 0' }}>Save</a>
-                  <button className="btn-primary" style={{ justifyContent:'center', fontSize:13, padding:'8px 0', background:'var(--ink)', color:'white' }}>Add to cart</button>
+                {/* Before / After comparison */}
+                {preview && (
+                  <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8, marginBottom:12 }}>
+                    <div>
+                      <div className="caption" style={{ color:'var(--graphite)', marginBottom:4, textAlign:'center' }}>Before</div>
+                      <img src={preview} alt="Before" style={{ width:'100%', borderRadius:10, aspectRatio:'1', objectFit:'cover' }} />
+                    </div>
+                    <div>
+                      <div className="caption" style={{ color:'var(--iris)', marginBottom:4, textAlign:'center', fontWeight:600 }}>After ✦</div>
+                      <img src={result} alt="After" style={{ width:'100%', borderRadius:10, aspectRatio:'1', objectFit:'cover' }} />
+                    </div>
+                  </div>
+                )}
+                {!preview && <img src={result} alt="Try-on result" style={{ width:'100%', borderRadius:12, marginBottom:12 }} />}
+                {/* Free returns banner */}
+                <div style={{ padding:'10px 14px', background:'rgba(22,163,74,0.06)', border:'1px solid rgba(22,163,74,0.2)', borderRadius:8, fontSize:12, color:'#15803d', fontWeight:500, marginBottom:12, display:'flex', alignItems:'center', gap:6 }}>
+                  🎁 Free returns for users with disabilities — no questions asked
+                </div>
+                <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:8 }}>
+                  <a href={result} download className="btn-ghost" style={{ justifyContent:'center', fontSize:12, padding:'8px 0' }}>Save</a>
+                  <button onClick={() => { if (navigator.share) navigator.share({ title:'My InclusiFit look', url: result! }); else speak('Share copied to clipboard') }}
+                    className="btn-ghost" style={{ justifyContent:'center', fontSize:12, padding:'8px 0' }}>Share</button>
+                  <button className="btn-primary" style={{ justifyContent:'center', fontSize:12, padding:'8px 0', background:'var(--ink)', color:'white' }}>Add to cart</button>
                 </div>
               </div>
             )}

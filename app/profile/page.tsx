@@ -6,12 +6,13 @@ import { Logo } from '@/components/Logo'
 type Step = 'welcome' | 'demo' | 'select'
 
 const CONDITIONS = [
-  { id: 'shorter_limbs',     label: 'Shorter limbs',       sub: 'Achondroplasia, dwarfism' },
-  { id: 'limited_dexterity', label: 'Limited dexterity',   sub: 'Muscular dystrophy, MS, Parkinson\'s' },
-  { id: 'afo_user',          label: 'AFO / brace user',    sub: 'GNE myopathy, cerebral palsy' },
-  { id: 'loose_fit',         label: 'Loose / easy-wear',   sub: 'SMA, fatigue conditions' },
-  { id: 'hair_loss',         label: 'Hair loss / wigs',     sub: 'Alopecia, cancer treatment' },
-  { id: 'visual_impairment', label: 'Visual impairment',   sub: 'Low vision, blindness' },
+  { id: 'shorter_limbs',     label: 'Shorter limbs',           sub: 'Achondroplasia, dwarfism' },
+  { id: 'limited_dexterity', label: 'Limited dexterity',       sub: 'Muscular dystrophy, MS, Parkinson\'s' },
+  { id: 'afo_user',          label: 'AFO / brace user',        sub: 'GNE myopathy, cerebral palsy' },
+  { id: 'loose_fit',         label: 'Loose / easy-wear',       sub: 'SMA, fatigue conditions' },
+  { id: 'hair_loss',         label: 'Hair loss / wigs',         sub: 'Alopecia, cancer treatment' },
+  { id: 'visual_impairment', label: 'Visual impairment',       sub: 'Low vision, blindness' },
+  { id: 'hearing_aid',       label: 'Hearing aid / cochlear',  sub: 'Hearing loss, cochlear implant' },
 ]
 
 /* Animated scan ray demo */

@@ -180,6 +180,8 @@ function SettingsTab({ conditions }: { conditions: string[] }) {
   const [voice, setVoice] = useState(true)
   const [hc, setHc] = useState(false)
   const [auto, setAuto] = useState(true)
+  const [caregiver, setCaregiver] = useState(false)
+  const [largeText, setLargeText] = useState(false)
 
   const Toggle = ({ on, set }: { on: boolean; set: (v: boolean) => void }) => (
     <button onClick={() => set(!on)} style={{ width: 38, height: 20, borderRadius: 99, border: 'none', cursor: 'pointer', background: on ? 'var(--iris)' : 'var(--fog)', position: 'relative', transition: 'background 0.2s', flexShrink: 0 }}>
@@ -205,6 +207,8 @@ function SettingsTab({ conditions }: { conditions: string[] }) {
           <div className="caption" style={{ color: 'var(--graphite)', letterSpacing: '0.06em', marginBottom: 4 }}>ACCESSIBILITY</div>
           <Row label="Voice output" sub="Read results aloud automatically" on={voice} set={setVoice} />
           <Row label="High contrast mode" sub="Increase visual contrast" on={hc} set={setHc} />
+          <Row label="Large text" sub="Increase font sizes throughout" on={largeText} set={setLargeText} />
+          <Row label="Caregiver mode" sub="Two-person navigation — caregiver navigates, you decide" on={caregiver} set={setCaregiver} />
         </div>
         <div className="card" style={{ padding: 20 }}>
           <div className="caption" style={{ color: 'var(--graphite)', letterSpacing: '0.06em', marginBottom: 4 }}>AI SETTINGS</div>

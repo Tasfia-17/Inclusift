@@ -25,7 +25,7 @@ export function Navbar({ dark = false }: { dark?: boolean }) {
           <Logo dark={onDark} size={20} />
         </Link>
         <nav style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-          {[['Shop', '/catalog'], ['Beauty', '/beauty'], ['Studio', '/studio']].map(([l, h]) => (
+          {[['Shop', '/catalog'], ['Beauty', '/beauty'], ['Studio', '/studio'], ['Hair', '/hair'], ['Shoes', '/shoes']].map(([l, h]) => (
             <Link key={h} href={h} style={{ fontSize: 14, fontWeight: 460, color: onDark ? 'rgba(255,255,255,0.75)' : 'var(--graphite)', padding: '6px 14px', borderRadius: 8, textDecoration: 'none', transition: 'color 0.15s' }}
               onMouseEnter={e => e.currentTarget.style.color = onDark ? '#fff' : 'var(--ink)'}
               onMouseLeave={e => e.currentTarget.style.color = onDark ? 'rgba(255,255,255,0.75)' : 'var(--graphite)'}>

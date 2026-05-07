@@ -12,6 +12,7 @@ interface Results {
   makeupResult?: string
   clothResult?: string
   hairResult?: string
+  hairstyleResult?: string
   earringResult?: string
   faceAttrs?: any
 }
@@ -34,13 +35,14 @@ async function pollTask(endpoint: string, taskId: string, maxAttempts = 30): Pro
 }
 
 const STEPS = [
-  { id: 'upload',   label: 'Uploading photo',        icon: '📸' },
-  { id: 'skin',     label: 'Analyzing skin',          icon: '✨' },
-  { id: 'face',     label: 'Reading face attributes', icon: '👤' },
-  { id: 'makeup',   label: 'Applying makeup VTO',     icon: '💄' },
-  { id: 'cloth',    label: 'Trying on outfit',        icon: '👗' },
-  { id: 'hair',     label: 'Styling hair color',      icon: '💇' },
-  { id: 'earring',  label: 'Adding jewelry',          icon: '💍' },
+  { id: 'upload',    label: 'Uploading photo',          icon: '📸' },
+  { id: 'skin',      label: 'Analyzing skin',            icon: '✨' },
+  { id: 'face',      label: 'Reading face attributes',   icon: '👤' },
+  { id: 'makeup',    label: 'Applying makeup VTO',       icon: '💄' },
+  { id: 'cloth',     label: 'Trying on outfit',          icon: '👗' },
+  { id: 'hair',      label: 'Styling hair color',        icon: '💇' },
+  { id: 'hairstyle', label: 'Generating wig style',      icon: '💆' },
+  { id: 'earring',   label: 'Adding jewelry',            icon: '💍' },
 ]
 
 function StudioContent() {
@@ -52,7 +54,7 @@ function StudioContent() {
   const [completedSteps, setCompletedSteps] = useState<string[]>([])
   const [results, setResults] = useState<Results>({})
   const [preview, setPreview] = useState<string | null>(null)
-  const [activeTab, setActiveTab] = useState<'skin' | 'makeup' | 'outfit' | 'hair' | 'jewelry'>('skin')
+  const [activeTab, setActiveTab] = useState<'skin' | 'makeup' | 'outfit' | 'hair' | 'hairstyle' | 'jewelry'>('skin')
   const fileRef = useRef<HTMLInputElement>(null)
   const fileIdRef = useRef<string | null>(null)
 
@@ -149,8 +151,23 @@ function StudioContent() {
         markStep('hair')
       } catch { /* non-fatal */ }
 
-      // Earring VTO
+      // Hairstyle generator (wig style)
       setCurrentStep(6)
+      try {
+        const hairstyleTask = await fetch('/api/vto/hairstyle', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ src_file_id: file_id })
+        }).then(r => r.json())
+        const hairstyleTaskId = hairstyleTask?.data?.task_id || hairstyleTask?.task_id
+        if (hairstyleTaskId) {
+          const hairstyleRes = await pollTask('hairstyle', hairstyleTaskId)
+          setResults(p => ({ ...p, hairstyleResult: hairstyleRes.url }))
+          markStep('hairstyle')
+        }
+      } catch { /* non-fatal */ }
+
+      // Earring VTO
+      setCurrentStep(7)
       try {
         const earringTask = await fetch('/api/vto/earring', {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -172,11 +189,12 @@ function StudioContent() {
   const scoreColor = (s: number) => s >= 75 ? '#22c55e' : s >= 50 ? '#f59e0b' : '#ef4444'
 
   const TABS = [
-    { id: 'skin',    label: 'Skin',    icon: '✨', result: results.skinOverlay },
-    { id: 'makeup',  label: 'Makeup',  icon: '💄', result: results.makeupResult },
-    { id: 'outfit',  label: 'Outfit',  icon: '👗', result: results.clothResult },
-    { id: 'hair',    label: 'Hair',    icon: '💇', result: results.hairResult },
-    { id: 'jewelry', label: 'Jewelry', icon: '💍', result: results.earringResult },
+    { id: 'skin',      label: 'Skin',      icon: '✨', result: results.skinOverlay },
+    { id: 'makeup',    label: 'Makeup',    icon: '💄', result: results.makeupResult },
+    { id: 'outfit',    label: 'Outfit',    icon: '👗', result: results.clothResult },
+    { id: 'hair',      label: 'Hair Color',icon: '💇', result: results.hairResult },
+    { id: 'hairstyle', label: 'Wig Style', icon: '💆', result: results.hairstyleResult },
+    { id: 'jewelry',   label: 'Jewelry',   icon: '💍', result: results.earringResult },
   ] as const
 
   return (
@@ -381,6 +399,16 @@ function StudioContent() {
                       {results.hairResult
                         ? <img src={results.hairResult} alt="Hair VTO" style={{ maxWidth: 320, width: '100%', borderRadius: 16 }} />
                         : <div style={{ textAlign: 'center', color: 'var(--muted)', padding: 40 }}>{status === 'running' ? '⏳ Styling hair...' : 'Run analysis to see results'}</div>
+                      }
+                    </div>
+                  )}
+
+                  {activeTab === 'hairstyle' && (
+                    <div>
+                      <div style={{ fontWeight: 700, fontSize: 16, color: 'var(--ink)', marginBottom: 16 }}>Wig Style Try-On</div>
+                      {results.hairstyleResult
+                        ? <img src={results.hairstyleResult} alt="Hairstyle VTO" style={{ maxWidth: 320, width: '100%', borderRadius: 16 }} />
+                        : <div style={{ textAlign: 'center', color: 'var(--graphite)', padding: 40 }}>{status === 'running' ? '⏳ Generating wig style...' : 'Run analysis to see results'}</div>
                       }
                     </div>
                   )}
