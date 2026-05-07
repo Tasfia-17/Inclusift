@@ -26,10 +26,7 @@ function TryOnContent() {
       fd.append('api', 'cloth')
       const { file_id } = await fetch('/api/vto/upload', { method:'POST', body:fd }).then(r=>r.json())
       setStatus('processing')
-      const data = await fetch('/api/vto/clothes', {
-        method:'POST', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ src_file_id: file_id, cloth_file_url: product.garment_url })
-      }).then(r=>r.json())
+      const data = await fetch('/api/vto/clothes', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ src_file_id:file_id, cloth_file_url:product.garment_url }) }).then(r=>r.json())
       const task_id = data?.data?.task_id || data?.task_id
       for (let i=0; i<30; i++) {
         await new Promise(r=>setTimeout(r,2000))
@@ -42,77 +39,55 @@ function TryOnContent() {
   }
 
   if (!product) return (
-    <div style={{ minHeight:'100vh', background:'var(--canvas)', display:'flex', alignItems:'center', justifyContent:'center' }}>
+    <div style={{ minHeight:'100vh', background:'var(--parchment)', display:'flex', alignItems:'center', justifyContent:'center' }}>
       <div style={{ textAlign:'center' }}>
-        <p style={{ color:'var(--muted)', marginBottom:12 }}>Product not found</p>
-        <Link href="/catalog" style={{ color:'var(--accent)', fontSize:14 }}>← Back to catalog</Link>
+        <p className="body" style={{ color:'var(--graphite)', marginBottom:12 }}>Product not found</p>
+        <Link href="/catalog" className="iris-link">← Back to catalog</Link>
       </div>
     </div>
   )
 
   return (
-    <div style={{ background:'var(--canvas)', minHeight:'100vh' }}>
+    <div style={{ background:'var(--parchment)', minHeight:'100vh' }}>
       <Navbar />
-      <div style={{ maxWidth:1000, margin:'0 auto', padding:'96px 24px 80px' }}>
-        <Link href="/catalog" style={{ fontSize:13, color:'var(--muted)', textDecoration:'none', display:'inline-block', marginBottom:24 }}>← Catalog</Link>
-
+      <div style={{ maxWidth:1000, margin:'0 auto', padding:'88px 32px 80px' }}>
+        <Link href="/catalog" className="iris-link" style={{ display:'inline-block', marginBottom:24 }}>← Catalog</Link>
         <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:24 }}>
-          {/* Left */}
           <div style={{ display:'flex', flexDirection:'column', gap:16 }}>
             <div className="card" style={{ overflow:'hidden' }}>
               <img src={product.image} alt={product.name} style={{ width:'100%', height:240, objectFit:'cover' }} />
               <div style={{ padding:'16px 20px 20px' }}>
-                <div style={{ fontWeight:600, fontSize:16, color:'var(--ink)' }}>{product.name}</div>
-                <div style={{ fontSize:13, color:'var(--muted)', marginTop:4 }}>{product.desc}</div>
-                <div style={{ fontWeight:700, fontSize:18, color:'var(--ink)', marginTop:10 }}>${product.price}</div>
+                <div style={{ fontSize:16, fontWeight:600, color:'var(--ink)' }}>{product.name}</div>
+                <div className="small" style={{ color:'var(--graphite)', marginTop:4 }}>{product.desc}</div>
+                <div style={{ fontSize:18, fontWeight:600, color:'var(--ink)', marginTop:10 }}>${product.price}</div>
               </div>
             </div>
-
             <div className="card" style={{ padding:20 }}>
-              <div style={{ fontWeight:500, fontSize:14, color:'var(--ink)', marginBottom:4 }}>Upload your photo</div>
-              <div style={{ fontSize:12, color:'var(--muted)', marginBottom:12 }}>Full-body · Good lighting · Plain background</div>
+              <div style={{ fontSize:14, fontWeight:500, color:'var(--ink)', marginBottom:4 }}>Upload your photo</div>
+              <div className="caption" style={{ color:'var(--graphite)', marginBottom:12 }}>Full-body · Good lighting · Plain background</div>
               <label style={{ display:'block', cursor:'pointer' }}>
                 <input ref={fileRef} type="file" accept="image/jpeg,image/png" style={{ display:'none' }}
                   onChange={e => { const f=e.target.files?.[0]; if(f) setPreview(URL.createObjectURL(f)) }}
                   aria-label="Upload photo for virtual try-on" />
-                <div style={{
-                  border: `2px dashed ${preview ? '#c4b5fd' : 'var(--border)'}`,
-                  borderRadius:10, padding:16, textAlign:'center',
-                  background: preview ? '#faf5ff' : 'var(--stone)',
-                  transition:'all 0.15s',
-                }}>
-                  {preview
-                    ? <img src={preview} alt="Preview" style={{ width:'100%', height:140, objectFit:'cover', borderRadius:8 }} />
-                    : <div style={{ color:'var(--muted)', padding:'16px 0' }}>
-                        <div style={{ fontSize:24, marginBottom:6 }}>📷</div>
-                        <div style={{ fontSize:13 }}>Click to upload</div>
-                      </div>
-                  }
+                <div style={{ border:`1.5px dashed ${preview?'var(--iris)':'var(--drift)'}`, borderRadius:12, padding:16, textAlign:'center', background:preview?'rgba(113,76,182,0.03)':'var(--parchment)', transition:'all 0.15s' }}>
+                  {preview ? <img src={preview} alt="Preview" style={{ width:'100%', height:140, objectFit:'cover', borderRadius:8 }} />
+                    : <div style={{ color:'var(--graphite)', padding:'16px 0' }}><div style={{ fontSize:24, marginBottom:6 }}>◫</div><div className="small">Click to upload</div></div>}
                 </div>
               </label>
-              <button onClick={run} disabled={!preview || status==='uploading' || status==='processing'}
+              <button onClick={run} disabled={!preview||status==='uploading'||status==='processing'}
                 className="btn-primary"
-                style={{ width:'100%', justifyContent:'center', marginTop:12, fontSize:14, padding:'11px 0', opacity:(!preview||status==='uploading'||status==='processing')?0.4:1, cursor:(!preview||status==='uploading'||status==='processing')?'not-allowed':'pointer' }}>
-                {status==='uploading' ? 'Uploading...' : status==='processing' ? 'Rendering (1–2 min)...' : 'Try it on'}
+                style={{ width:'100%', marginTop:12, justifyContent:'center', opacity:(!preview||status==='uploading'||status==='processing')?0.4:1, cursor:(!preview||status==='uploading'||status==='processing')?'not-allowed':'pointer', background:'var(--ink)', color:'white' }}>
+                {status==='uploading'?'Uploading...':status==='processing'?'Rendering (1–2 min)...':'Try it on →'}
               </button>
             </div>
           </div>
-
-          {/* Right — result */}
           <div className="card" style={{ display:'flex', alignItems:'center', justifyContent:'center', minHeight:480, padding:24 }}>
-            {status==='idle' && (
-              <div style={{ textAlign:'center', color:'var(--muted)' }}>
-                <div style={{ fontSize:48, marginBottom:12 }}>👗</div>
-                <div style={{ fontSize:14 }}>Result appears here</div>
-              </div>
-            )}
+            {status==='idle' && <div style={{ textAlign:'center', color:'var(--graphite)' }}><div style={{ fontSize:40, marginBottom:12 }}>◫</div><div className="small">Result appears here</div></div>}
             {(status==='uploading'||status==='processing') && (
               <div style={{ textAlign:'center' }}>
-                <div style={{ width:36, height:36, border:'2px solid #ede9fe', borderTopColor:'var(--accent)', borderRadius:'50%', animation:'spin 0.8s linear infinite', margin:'0 auto 16px' }} />
-                <div style={{ fontSize:14, fontWeight:500, color:'var(--ink)' }}>
-                  {status==='uploading' ? 'Uploading...' : 'AI rendering...'}
-                </div>
-                <div style={{ fontSize:12, color:'var(--muted)', marginTop:4 }}>Takes 1–2 minutes</div>
+                <div style={{ width:32, height:32, border:'2px solid var(--fog)', borderTopColor:'var(--iris)', borderRadius:'50%', animation:'spin 0.8s linear infinite', margin:'0 auto 16px' }} />
+                <div style={{ fontSize:14, fontWeight:500, color:'var(--ink)' }}>{status==='uploading'?'Uploading...':'AI rendering...'}</div>
+                <div className="caption" style={{ color:'var(--graphite)', marginTop:4 }}>Takes 1–2 minutes</div>
               </div>
             )}
             {status==='done' && result && (
@@ -123,27 +98,20 @@ function TryOnContent() {
                 </div>
                 <img src={result} alt="Try-on result" style={{ width:'100%', borderRadius:12 }} />
                 <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8, marginTop:12 }}>
-                  <a href={result} download className="btn-ghost" style={{ justifyContent:'center', fontSize:13, padding:'9px 0' }}>Save</a>
-                  <button className="btn-primary" style={{ justifyContent:'center', fontSize:13, padding:'9px 0' }}>Add to cart</button>
+                  <a href={result} download className="btn-ghost" style={{ justifyContent:'center', fontSize:13, padding:'8px 0' }}>Save</a>
+                  <button className="btn-primary" style={{ justifyContent:'center', fontSize:13, padding:'8px 0', background:'var(--ink)', color:'white' }}>Add to cart</button>
                 </div>
-                <button onClick={()=>{setStatus('idle');setResult(null)}} style={{ width:'100%', marginTop:8, fontSize:12, color:'var(--muted)', background:'none', border:'none', cursor:'pointer' }}>Try another photo</button>
               </div>
             )}
-            {status==='error' && (
-              <div style={{ textAlign:'center' }}>
-                <div style={{ fontSize:32, marginBottom:8 }}>⚠️</div>
-                <div style={{ fontSize:14, color:'#dc2626' }}>Something went wrong</div>
-                <button onClick={()=>setStatus('idle')} style={{ marginTop:8, fontSize:13, color:'var(--accent)', background:'none', border:'none', cursor:'pointer' }}>Try again</button>
-              </div>
-            )}
+            {status==='error' && <div style={{ textAlign:'center' }}><div style={{ fontSize:13, color:'#dc2626', marginBottom:8 }}>Something went wrong</div><button onClick={()=>setStatus('idle')} className="iris-link" style={{ background:'none', border:'none', cursor:'pointer', fontFamily:'inherit' }}>Try again</button></div>}
           </div>
         </div>
       </div>
-      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+      <style>{`@keyframes spin { to { transform:rotate(360deg); } }`}</style>
     </div>
   )
 }
 
 export default function TryOnPage() {
-  return <Suspense fallback={<div style={{ minHeight:'100vh', background:'var(--canvas)' }} />}><TryOnContent /></Suspense>
+  return <Suspense fallback={<div style={{ minHeight:'100vh', background:'var(--parchment)' }} />}><TryOnContent /></Suspense>
 }

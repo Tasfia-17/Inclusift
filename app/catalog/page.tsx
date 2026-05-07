@@ -6,20 +6,17 @@ import { Navbar } from '@/components/Navbar'
 import products from '@/data/products.json'
 
 const CATS = ['all','clothing','footwear','beauty','hair','jewelry']
-
-const BADGE: Record<string, [string,string]> = {
-  magnetic_snap:  ['Magnetic snap',  '#ede9fe #5b21b6'],
-  velcro:         ['Velcro',         '#dbeafe #1d4ed8'],
-  elastic:        ['Elastic waist',  '#dcfce7 #15803d'],
-  loose:          ['Loose fit',      '#fef3c7 #92400e'],
-  afo_compatible: ['AFO ✓',          '#fef9c3 #854d0e'],
-  pump:           ['Pump dispenser', '#ccfbf1 #0f766e'],
-  front_opening:  ['Front opening',  '#fce7f3 #9d174d'],
+const BADGE: Record<string, [string, string]> = {
+  magnetic_snap:  ['Magnetic snap',  'rgba(113,76,182,0.08) var(--iris)'],
+  velcro:         ['Velcro',         'rgba(13,148,136,0.08) #0d9488'],
+  elastic:        ['Elastic waist',  'rgba(22,163,74,0.08) #16a34a'],
+  loose:          ['Loose fit',      'rgba(217,119,6,0.08) #d97706'],
+  afo_compatible: ['AFO ✓',          'rgba(220,38,38,0.08) #dc2626'],
+  pump:           ['Pump dispenser', 'rgba(2,132,199,0.08) #0284c7'],
+  front_opening:  ['Front opening',  'rgba(113,76,182,0.08) var(--iris)'],
 }
-
 function getBadges(p: any) {
-  const a = p.adaptive || {}
-  const b: string[] = []
+  const a = p.adaptive || {}, b: string[] = []
   if (a.closure_type === 'magnetic_snap') b.push('magnetic_snap')
   if (a.closure_type === 'velcro') b.push('velcro')
   if (a.waistband === 'elastic') b.push('elastic')
@@ -35,7 +32,6 @@ function CatalogContent() {
   const conditions = sp.get('c')?.split(',').filter(Boolean) || []
   const [cat, setCat] = useState('all')
   const [list, setList] = useState(products)
-
   useEffect(() => {
     let r = products
     if (conditions.length) r = r.filter(p => p.tags.some(t => conditions.includes(t)))
@@ -44,71 +40,53 @@ function CatalogContent() {
   }, [conditions.join(','), cat])
 
   return (
-    <div style={{ background: 'var(--canvas)', minHeight: '100vh' }}>
+    <div style={{ background: 'var(--parchment)', minHeight: '100vh' }}>
       <Navbar />
-      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '96px 24px 80px' }}>
-
+      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '88px 32px 80px' }}>
         <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 24 }}>
           <div>
-            <h1 className="serif" style={{ fontSize: 32, color: 'var(--ink)' }}>Adaptive Catalog</h1>
-            <p style={{ fontSize: 13, color: 'var(--muted)', marginTop: 4 }}>
-              {list.length} products{conditions.length ? ' · filtered for your profile' : ''}
-            </p>
+            <h1 className="h2" style={{ color: 'var(--ink)' }}>Adaptive Catalog</h1>
+            <p className="small" style={{ color: 'var(--graphite)', marginTop: 4 }}>{list.length} products{conditions.length ? ' · filtered for your profile' : ''}</p>
           </div>
-          {conditions.length > 0 && (
-            <Link href="/profile" style={{ fontSize: 13, color: 'var(--accent)', textDecoration: 'none' }}>Edit profile</Link>
-          )}
+          {conditions.length > 0 && <Link href="/profile" className="iris-link">Edit profile</Link>}
         </div>
 
-        {/* Category tabs */}
-        <div style={{ display: 'flex', gap: 6, marginBottom: 32, overflowX: 'auto', paddingBottom: 4 }}>
+        <div style={{ display: 'flex', gap: 6, marginBottom: 28, overflowX: 'auto', paddingBottom: 4 }}>
           {CATS.map(c => (
-            <button key={c} onClick={() => setCat(c)} style={{
-              padding: '7px 16px', borderRadius: 9999, fontSize: 13, fontWeight: 500,
-              border: 'none', cursor: 'pointer', whiteSpace: 'nowrap', transition: 'all 0.15s',
-              background: cat === c ? 'var(--ink)' : 'var(--surface)',
-              color: cat === c ? 'var(--canvas)' : 'var(--muted)',
-              boxShadow: cat === c ? 'none' : '#e8e6e3 0px 0px 0px 1px inset',
-            }}>
+            <button key={c} onClick={() => setCat(c)} className={cat === c ? 'tab-active' : 'tab-inactive'} style={{ fontFamily: 'inherit', fontSize: 14 }}>
               {c === 'all' ? 'All' : c.charAt(0).toUpperCase() + c.slice(1)}
             </button>
           ))}
         </div>
 
-        {/* Grid */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(280px,1fr))', gap: 16 }}>
           {list.map(p => {
             const bs = getBadges(p)
             return (
-              <div key={p.id} className="card" style={{ overflow: 'hidden', transition: 'transform 0.2s ease, box-shadow 0.2s ease' }}
-                onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = 'rgba(0,0,0,0.1) 0px 0px 0px 1px, rgba(0,0,0,0.08) 0px 8px 24px' }}
-                onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'rgba(0,0,0,0.06) 0px 0px 0px 1px, rgba(0,0,0,0.04) 0px 2px 8px' }}>
-                <div style={{ height: 200, overflow: 'hidden', background: 'var(--stone)' }}>
+              <div key={p.id} className="card" style={{ overflow: 'hidden', transition: 'border-color 0.2s ease' }}
+                onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--iris)'}
+                onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--fog)'}>
+                <div style={{ height: 200, overflow: 'hidden', background: 'var(--fog)' }}>
                   <img src={p.image} alt={p.name} style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.4s ease' }}
-                    onMouseEnter={e => (e.currentTarget.style.transform = 'scale(1.04)')}
-                    onMouseLeave={e => (e.currentTarget.style.transform = 'scale(1)')} />
+                    onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.04)'}
+                    onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'} />
                 </div>
-                <div style={{ padding: '16px 16px 20px' }}>
-                  <div style={{ fontSize: 11, color: 'var(--muted)', textTransform: 'capitalize', marginBottom: 4 }}>{p.category}</div>
-                  <div style={{ fontWeight: 600, fontSize: 14, color: 'var(--ink)', marginBottom: 4 }}>{p.name}</div>
-                  <div style={{ fontSize: 13, color: 'var(--body)', marginBottom: 10, lineHeight: 1.4, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{p.desc}</div>
-
+                <div style={{ padding: '16px' }}>
+                  <div className="caption" style={{ color: 'var(--graphite)', textTransform: 'capitalize', marginBottom: 4 }}>{p.category}</div>
+                  <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--ink)', marginBottom: 4 }}>{p.name}</div>
+                  <div className="small" style={{ color: 'var(--graphite)', marginBottom: 10, lineHeight: 1.4 }}>{p.desc}</div>
                   {bs.length > 0 && (
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginBottom: 12 }}>
                       {bs.slice(0,3).map(b => {
-                        const [label, colors] = BADGE[b] || [b, '#f3f4f6 #374151']
+                        const [label, colors] = BADGE[b] || [b, 'var(--fog) var(--graphite)']
                         const [bg, fg] = colors.split(' ')
-                        return (
-                          <span key={b} className="tag" style={{ background: bg, color: fg }}>{label}</span>
-                        )
+                        return <span key={b} style={{ fontSize: 11, fontWeight: 500, padding: '3px 8px', borderRadius: 999, background: bg, color: fg }}>{label}</span>
                       })}
                     </div>
                   )}
-
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <span style={{ fontWeight: 700, fontSize: 16, color: 'var(--ink)' }}>${p.price}</span>
-                    <Link href={p.category === 'beauty' ? '/beauty' : `/tryon?product=${p.id}`}
-                      className="btn-primary" style={{ fontSize: 12, padding: '7px 14px' }}>
+                    <span style={{ fontSize: 16, fontWeight: 600, color: 'var(--ink)' }}>${p.price}</span>
+                    <Link href={p.category === 'beauty' ? '/beauty' : `/tryon?product=${p.id}`} className="btn-ghost btn-sm">
                       {p.category === 'beauty' ? 'Analyze' : 'Try on'}
                     </Link>
                   </div>
@@ -117,12 +95,11 @@ function CatalogContent() {
             )
           })}
         </div>
-
         {list.length === 0 && (
-          <div style={{ textAlign: 'center', padding: '80px 0', color: 'var(--muted)' }}>
-            <div style={{ fontSize: 40, marginBottom: 12 }}>🔍</div>
-            <div style={{ fontWeight: 500 }}>No products match your filters</div>
-            <Link href="/profile" style={{ fontSize: 13, color: 'var(--accent)', marginTop: 8, display: 'inline-block' }}>Update profile</Link>
+          <div style={{ textAlign: 'center', padding: '80px 0', color: 'var(--graphite)' }}>
+            <div style={{ fontSize: 32, marginBottom: 12 }}>◈</div>
+            <div style={{ fontWeight: 500, marginBottom: 8 }}>No products match your filters</div>
+            <Link href="/profile" className="iris-link">Update profile</Link>
           </div>
         )}
       </div>
@@ -131,9 +108,5 @@ function CatalogContent() {
 }
 
 export default function CatalogPage() {
-  return (
-    <Suspense fallback={<div style={{ minHeight: '100vh', background: 'var(--canvas)' }} />}>
-      <CatalogContent />
-    </Suspense>
-  )
+  return <Suspense fallback={<div style={{ minHeight: '100vh', background: 'var(--parchment)' }} />}><CatalogContent /></Suspense>
 }

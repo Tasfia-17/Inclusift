@@ -1,11 +1,9 @@
 import type { Metadata } from 'next'
 import './globals.css'
-
 export const metadata: Metadata = {
-  title: 'InclusiFit — AI Fashion for Everyone',
-  description: 'AI-powered adaptive fashion and beauty. Virtual try-on, skin analysis, and smart recommendations for people with disabilities.',
+  title: 'InclusiFit — Adaptive Fashion for Everyone',
+  description: 'AI-powered virtual try-on and adaptive filters for people with disabilities.',
 }
-
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">

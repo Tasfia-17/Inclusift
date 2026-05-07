@@ -1,21 +1,14 @@
-/* Logo: clean wordmark with sparkle mark */
-export function Logo({ size = 30 }: { size?: number }) {
+/* Clean wordmark logo */
+export function Logo({ dark = false, size = 22 }: { dark?: boolean; size?: number }) {
+  const c = dark ? '#ffffff' : '#292827'
   return (
-    <svg width={size * 1.4} height={size} viewBox="0 0 56 32" fill="none" aria-hidden="true">
-      <defs>
-        <linearGradient id="lg" x1="0" y1="0" x2="56" y2="32" gradientUnits="userSpaceOnUse">
-          <stop stopColor="#7c3aed"/>
-          <stop offset="1" stopColor="#ec4899"/>
-        </linearGradient>
-      </defs>
-      {/* I mark — rounded square with person */}
-      <rect width="32" height="32" rx="9" fill="url(#lg)"/>
-      <circle cx="16" cy="11" r="4" fill="white"/>
-      <path d="M8 28c0-4.418 3.582-8 8-8s8 3.582 8 8" stroke="white" strokeWidth="2.5" strokeLinecap="round" fill="none"/>
-      {/* Sparkle dot */}
-      <circle cx="26" cy="6" r="2" fill="#ec4899"/>
-      {/* "fit" text mark */}
-      <text x="36" y="22" fontFamily="system-ui" fontWeight="800" fontSize="14" fill="#1c1917" letterSpacing="-0.5">fit</text>
+    <svg width={size * 4.2} height={size} viewBox="0 0 88 22" fill="none" aria-label="InclusiFit">
+      {/* Mark: rounded square with person silhouette */}
+      <rect width="22" height="22" rx="6" fill="#714cb6"/>
+      <circle cx="11" cy="8.5" r="3" fill="white"/>
+      <path d="M5 20c0-3.314 2.686-6 6-6s6 2.686 6 6" stroke="white" strokeWidth="2" strokeLinecap="round" fill="none"/>
+      {/* Wordmark */}
+      <text x="28" y="16" fontFamily="Inter, system-ui" fontWeight="600" fontSize="14" fill={c} letterSpacing="-0.3">InclusiFit</text>
     </svg>
   )
 }
