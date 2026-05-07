@@ -1,0 +1,93 @@
+<svg width="800" height="320" viewBox="0 0 800 320" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="g1" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#714cb6"/>
+      <stop offset="1" stop-color="#9b6de0"/>
+    </linearGradient>
+    <linearGradient id="g2" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#ec4899"/>
+      <stop offset="1" stop-color="#f472b6"/>
+    </linearGradient>
+    <linearGradient id="g3" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#0d9488"/>
+      <stop offset="1" stop-color="#2dd4bf"/>
+    </linearGradient>
+    <linearGradient id="gbg" x1="0" y1="0" x2="800" y2="320" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#f2f0eb"/>
+      <stop offset="1" stop-color="#ede9fe"/>
+    </linearGradient>
+    <filter id="s1">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#714cb6" flood-opacity="0.2"/>
+    </filter>
+    <filter id="s2">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#ec4899" flood-opacity="0.2"/>
+    </filter>
+    <filter id="s3">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#0d9488" flood-opacity="0.2"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="800" height="320" rx="20" fill="url(#gbg)"/>
+
+  <!-- Grid lines -->
+  <g opacity="0.06">
+    <line x1="0" y1="80" x2="800" y2="80" stroke="#714cb6" stroke-width="1"/>
+    <line x1="0" y1="160" x2="800" y2="160" stroke="#714cb6" stroke-width="1"/>
+    <line x1="0" y1="240" x2="800" y2="240" stroke="#714cb6" stroke-width="1"/>
+    <line x1="160" y1="0" x2="160" y2="320" stroke="#714cb6" stroke-width="1"/>
+    <line x1="320" y1="0" x2="320" y2="320" stroke="#714cb6" stroke-width="1"/>
+    <line x1="480" y1="0" x2="480" y2="320" stroke="#714cb6" stroke-width="1"/>
+    <line x1="640" y1="0" x2="640" y2="320" stroke="#714cb6" stroke-width="1"/>
+  </g>
+
+  <!-- Card 1: User -->
+  <g filter="url(#s1)">
+    <rect x="40" y="100" width="160" height="120" rx="16" fill="url(#g1)"/>
+    <rect x="40" y="100" width="160" height="32" rx="16" fill="white" opacity="0.15"/>
+    <rect x="40" y="116" width="160" height="16" fill="white" opacity="0.08"/>
+  </g>
+  <text x="120" y="152" text-anchor="middle" font-family="Inter, sans-serif" font-weight="700" font-size="14" fill="white">User</text>
+  <text x="120" y="172" text-anchor="middle" font-family="Inter, sans-serif" font-weight="400" font-size="11" fill="rgba(255,255,255,0.8)">Uploads photo</text>
+  <text x="120" y="190" text-anchor="middle" font-family="Inter, sans-serif" font-weight="400" font-size="11" fill="rgba(255,255,255,0.8)">Sets profile</text>
+  <text x="120" y="208" text-anchor="middle" font-family="Inter, sans-serif" font-weight="400" font-size="11" fill="rgba(255,255,255,0.8)">Voice commands</text>
+
+  <!-- Arrow 1 -->
+  <path d="M200 160 L240 160" stroke="#714cb6" stroke-width="2" stroke-dasharray="4 3"/>
+  <polygon points="240,155 252,160 240,165" fill="#714cb6"/>
+
+  <!-- Card 2: InclusiFit -->
+  <g filter="url(#s2)">
+    <rect x="252" y="80" width="200" height="160" rx="16" fill="url(#g2)"/>
+    <rect x="252" y="80" width="200" height="32" rx="16" fill="white" opacity="0.15"/>
+    <rect x="252" y="96" width="200" height="16" fill="white" opacity="0.08"/>
+  </g>
+  <text x="352" y="128" text-anchor="middle" font-family="Inter, sans-serif" font-weight="700" font-size="15" fill="white">InclusiFit</text>
+  <text x="352" y="150" text-anchor="middle" font-family="Inter, sans-serif" font-weight="400" font-size="11" fill="rgba(255,255,255,0.9)">Adaptive filters</text>
+  <text x="352" y="168" text-anchor="middle" font-family="Inter, sans-serif" font-weight="400" font-size="11" fill="rgba(255,255,255,0.9)">Profile matching</text>
+  <text x="352" y="186" text-anchor="middle" font-family="Inter, sans-serif" font-weight="400" font-size="11" fill="rgba(255,255,255,0.9)">API orchestration</text>
+  <text x="352" y="204" text-anchor="middle" font-family="Inter, sans-serif" font-weight="400" font-size="11" fill="rgba(255,255,255,0.9)">Session save</text>
+  <text x="352" y="222" text-anchor="middle" font-family="Inter, sans-serif" font-weight="400" font-size="11" fill="rgba(255,255,255,0.9)">Voice output</text>
+
+  <!-- Arrow 2 -->
+  <path d="M452 160 L492 160" stroke="#ec4899" stroke-width="2" stroke-dasharray="4 3"/>
+  <polygon points="492,155 504,160 492,165" fill="#ec4899"/>
+
+  <!-- Card 3: Perfect Corp -->
+  <g filter="url(#s3)">
+    <rect x="504" y="60" width="220" height="200" rx="16" fill="url(#g3)"/>
+    <rect x="504" y="60" width="220" height="32" rx="16" fill="white" opacity="0.15"/>
+    <rect x="504" y="76" width="220" height="16" fill="white" opacity="0.08"/>
+  </g>
+  <text x="614" y="108" text-anchor="middle" font-family="Inter, sans-serif" font-weight="700" font-size="14" fill="white">Perfect Corp APIs</text>
+  <text x="614" y="132" text-anchor="middle" font-family="Inter, sans-serif" font-weight="400" font-size="11" fill="rgba(255,255,255,0.9)">Clothes VTO</text>
+  <text x="614" y="150" text-anchor="middle" font-family="Inter, sans-serif" font-weight="400" font-size="11" fill="rgba(255,255,255,0.9)">Shoes VTO</text>
+  <text x="614" y="168" text-anchor="middle" font-family="Inter, sans-serif" font-weight="400" font-size="11" fill="rgba(255,255,255,0.9)">Skin Analysis HD</text>
+  <text x="614" y="186" text-anchor="middle" font-family="Inter, sans-serif" font-weight="400" font-size="11" fill="rgba(255,255,255,0.9)">Makeup VTO</text>
+  <text x="614" y="204" text-anchor="middle" font-family="Inter, sans-serif" font-weight="400" font-size="11" fill="rgba(255,255,255,0.9)">Hair + Wig VTO</text>
+  <text x="614" y="222" text-anchor="middle" font-family="Inter, sans-serif" font-weight="400" font-size="11" fill="rgba(255,255,255,0.9)">Jewelry VTO (5 types)</text>
+  <text x="614" y="240" text-anchor="middle" font-family="Inter, sans-serif" font-weight="400" font-size="11" fill="rgba(255,255,255,0.9)">Text-to-Image</text>
+
+  <!-- Label -->
+  <text x="400" y="300" text-anchor="middle" font-family="Inter, sans-serif" font-weight="500" font-size="12" fill="#666666" letter-spacing="1">ARCHITECTURE OVERVIEW</text>
+</svg>
