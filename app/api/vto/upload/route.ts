@@ -12,6 +12,12 @@ const FILE_ENDPOINT: Record<string, string> = {
   'hair-color':    'hair-color',
   'earring':       '2d-vto/earring',
   'face':          'face-attr-analysis',
+  'bag':           'bag',
+  'hat':           'hat',
+  'ring':          '2d-vto/ring',
+  'bracelet':      '2d-vto/bracelet',
+  'watch':         '2d-vto/watch',
+  'necklace':      '2d-vto/necklace',
 }
 
 export async function POST(req: NextRequest) {

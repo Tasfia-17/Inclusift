@@ -42,10 +42,13 @@ function Sidebar({ tab, setTab }: { tab: Tab; setTab: (t: Tab) => void }) {
 
 function HomeTab({ conditions }: { conditions: string[] }) {
   const ACTIONS = [
-    { label: 'AI Studio',      sub: 'Run full analysis',    href: '/studio',  accent: 'var(--iris)' },
-    { label: 'Browse Catalog', sub: 'Adaptive products',    href: '/catalog', accent: '#0d9488' },
-    { label: 'Skin Analysis',  sub: 'Beauty insights',      href: '/beauty',  accent: '#d97706' },
-    { label: 'Virtual Try-On', sub: 'Clothes & accessories', href: '/tryon',  accent: '#dc2626' },
+    { label: 'AI Studio',      sub: 'Run full analysis',    href: '/studio',      accent: 'var(--iris)' },
+    { label: 'Browse Catalog', sub: 'Adaptive products',    href: '/catalog',     accent: '#0d9488' },
+    { label: 'Skin Analysis',  sub: 'Beauty insights',      href: '/beauty',      accent: '#d97706' },
+    { label: 'Virtual Try-On', sub: 'Clothes & accessories', href: '/tryon',      accent: '#dc2626' },
+    { label: 'Shoes VTO',      sub: 'AFO-compatible',       href: '/shoes',       accent: '#7c3aed' },
+    { label: 'Accessories',    sub: 'Jewelry, bags, hats',  href: '/accessories', accent: '#0284c7' },
+    { label: 'Hair & Wigs',    sub: 'Try styles & colors',  href: '/hair',        accent: '#ea580c' },
   ]
   const RECENT = [
     { api: 'Skin Analysis HD',  time: '2 min ago', score: '78/100' },
@@ -63,7 +66,7 @@ function HomeTab({ conditions }: { conditions: string[] }) {
       </div>
 
       {/* Quick actions */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 12, marginBottom: 28 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(160px,1fr))', gap: 12, marginBottom: 28 }}>
         {ACTIONS.map(a => (
           <Link key={a.label} href={a.href} style={{ textDecoration: 'none', display: 'block', padding: '20px', borderRadius: 16, background: 'var(--bone)', border: '1px solid var(--fog)', transition: 'border-color 0.2s ease' }}
             onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--iris)'}
