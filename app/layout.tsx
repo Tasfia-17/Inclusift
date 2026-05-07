@@ -2,8 +2,8 @@ import type { Metadata } from 'next'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'InclusiFit — Adaptive Fashion for Everyone',
-  description: 'AI-powered virtual try-on and smart filters for people with disabilities.',
+  title: 'InclusiFit — AI Fashion for Everyone',
+  description: 'AI-powered adaptive fashion and beauty. Virtual try-on, skin analysis, and smart recommendations for people with disabilities.',
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -14,9 +14,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
       </head>
       <body>
-        <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:bg-violet-600 focus:text-white focus:px-3 focus:py-1.5 focus:rounded-full focus:text-sm">
-          Skip to content
-        </a>
+        <a href="#main" className="sr-only">Skip to content</a>
         <div id="main">{children}</div>
       </body>
     </html>
