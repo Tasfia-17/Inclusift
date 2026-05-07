@@ -1,0 +1,99 @@
+[
+  {
+    "id": "dress-001",
+    "name": "Adaptive Wrap Dress",
+    "category": "clothing",
+    "image": "https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?w=400",
+    "garment_url": "https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?w=800",
+    "price": 89.99,
+    "adaptive": { "closure_type": "magnetic_snap", "waistband": "elastic", "fit_style": "loose", "length": "petite", "dressing_method": "front_opening" },
+    "tags": ["shorter_limbs", "limited_dexterity", "loose_fit"],
+    "desc": "Magnetic snap closures, elastic waist, petite length"
+  },
+  {
+    "id": "top-001",
+    "name": "Easy-On Velcro Top",
+    "category": "clothing",
+    "image": "https://images.unsplash.com/photo-1434389677669-e08b4cac3105?w=400",
+    "garment_url": "https://images.unsplash.com/photo-1434389677669-e08b4cac3105?w=800",
+    "price": 49.99,
+    "adaptive": { "closure_type": "velcro", "waistband": "none", "fit_style": "loose", "dressing_method": "front_opening" },
+    "tags": ["limited_dexterity", "loose_fit"],
+    "desc": "Velcro front closure, loose fit, easy to put on independently"
+  },
+  {
+    "id": "pants-001",
+    "name": "Elastic Waist Trousers",
+    "category": "clothing",
+    "image": "https://images.unsplash.com/photo-1594938298603-c8148c4b4e5b?w=400",
+    "garment_url": "https://images.unsplash.com/photo-1594938298603-c8148c4b4e5b?w=800",
+    "price": 69.99,
+    "adaptive": { "closure_type": "none", "waistband": "elastic", "fit_style": "relaxed", "dressing_method": "pull_on" },
+    "tags": ["limited_dexterity", "loose_fit"],
+    "desc": "Full elastic waistband, pull-on style, no buttons or zips"
+  },
+  {
+    "id": "shoe-001",
+    "name": "AFO-Compatible Sneaker",
+    "category": "footwear",
+    "image": "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400",
+    "garment_url": "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800",
+    "price": 129.99,
+    "adaptive": { "afo_compatible": true, "width": "wide", "closure_type": "velcro", "sizes": ["5","6","7","8","9","10"] },
+    "tags": ["afo_user"],
+    "desc": "Extra-wide, fits over AFO braces, velcro strap"
+  },
+  {
+    "id": "shoe-002",
+    "name": "Wide-Fit Slip-On",
+    "category": "footwear",
+    "image": "https://images.unsplash.com/photo-1525966222134-fcfa99b8ae77?w=400",
+    "garment_url": "https://images.unsplash.com/photo-1525966222134-fcfa99b8ae77?w=800",
+    "price": 79.99,
+    "adaptive": { "afo_compatible": false, "width": "wide", "closure_type": "slip_on", "sizes": ["4","5","6","7","8"] },
+    "tags": ["afo_user", "limited_dexterity"],
+    "desc": "Wide fit, no laces, easy slip-on"
+  },
+  {
+    "id": "foundation-001",
+    "name": "Easy-Pump Foundation",
+    "category": "beauty",
+    "image": "https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=400",
+    "price": 42.00,
+    "adaptive": { "container_type": "pump", "application_method": "sponge", "grip_difficulty": "easy" },
+    "skin_concerns": ["oiliness", "pores", "redness"],
+    "tags": ["limited_dexterity"],
+    "desc": "One-handed pump dispenser, buildable coverage"
+  },
+  {
+    "id": "lipstick-001",
+    "name": "Twist-Up Lip Color",
+    "category": "beauty",
+    "image": "https://images.unsplash.com/photo-1586495777744-4e6232bf2f9b?w=400",
+    "price": 28.00,
+    "adaptive": { "container_type": "twist", "application_method": "direct", "grip_difficulty": "easy" },
+    "skin_concerns": [],
+    "tags": ["limited_dexterity"],
+    "desc": "Large-grip twist mechanism, no cap to lose"
+  },
+  {
+    "id": "wig-001",
+    "name": "Natural Wave Wig",
+    "category": "hair",
+    "image": "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=400",
+    "price": 189.00,
+    "adaptive": { "type": "wig", "attachment": "adjustable_band" },
+    "tags": ["hair_loss"],
+    "desc": "Adjustable band, natural wave, lightweight"
+  },
+  {
+    "id": "earring-001",
+    "name": "Hearing Aid Friendly Studs",
+    "category": "jewelry",
+    "image": "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=400",
+    "price": 35.00,
+    "adaptive": { "hearing_aid_compatible": true, "closure_type": "screw_back" },
+    "tags": [],
+    "desc": "Low-profile studs, won't interfere with behind-ear hearing aids"
+  }
+]

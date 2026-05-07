@@ -1,0 +1,31 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --foreground: #0a0a0a;
+  --background: #ffffff;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --foreground: #ededed;
+    --background: #0a0a0a;
+  }
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+}
+
+/* High contrast support */
+@media (forced-colors: active) {
+  * { forced-color-adjust: auto; }
+}
+
+/* Minimum tap target size */
+button, a, [role="button"] {
+  min-height: 44px;
+  min-width: 44px;
+}
