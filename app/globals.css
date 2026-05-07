@@ -2,30 +2,66 @@
 @tailwind components;
 @tailwind utilities;
 
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
 :root {
-  --foreground: #0a0a0a;
-  --background: #ffffff;
+  --bg: #faf5ff;
+  --surface: rgba(255,255,255,0.8);
+  --border: rgba(168,85,247,0.15);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --foreground: #ededed;
-    --background: #0a0a0a;
-  }
-}
+* { box-sizing: border-box; }
 
 body {
-  color: var(--foreground);
-  background: var(--background);
+  background: var(--bg);
+  font-family: 'Inter', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
 }
 
-/* High contrast support */
-@media (forced-colors: active) {
-  * { forced-color-adjust: auto; }
+/* Glassmorphism utility */
+.glass {
+  background: rgba(255,255,255,0.7);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255,255,255,0.5);
 }
 
-/* Minimum tap target size */
-button, a, [role="button"] {
-  min-height: 44px;
-  min-width: 44px;
+.glass-purple {
+  background: rgba(250,245,255,0.8);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(168,85,247,0.15);
 }
+
+/* Gradient text */
+.gradient-text {
+  background: linear-gradient(135deg, #7c3aed, #ec4899, #14b8a6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Animated gradient background */
+.animated-gradient {
+  background: linear-gradient(-45deg, #faf5ff, #fce7f3, #f0fdfa, #ede9fe);
+  background-size: 400% 400%;
+  animation: gradient 12s ease infinite;
+}
+
+/* Shimmer loading */
+.shimmer {
+  background: linear-gradient(90deg, #f3e8ff 25%, #e9d5ff 50%, #f3e8ff 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #faf5ff; }
+::-webkit-scrollbar-thumb { background: #d8b4fe; border-radius: 3px; }
+
+/* Accessibility */
+button, a, [role="button"] { min-height: 44px; min-width: 44px; }
+@media (forced-colors: active) { * { forced-color-adjust: auto; } }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border-width: 0; }
+.focus\:not-sr-only:focus { position: static; width: auto; height: auto; padding: inherit; margin: inherit; overflow: visible; clip: auto; white-space: normal; }
