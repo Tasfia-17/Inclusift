@@ -1,0 +1,12 @@
+{
+  "name": "inclusift-bot",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "start": "node --env-file=.env index.js",
+    "dev": "node --watch --env-file=.env index.js"
+  },
+  "dependencies": {
+    "spectrum-ts": "latest"
+  }
+}

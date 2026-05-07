@@ -294,6 +294,35 @@ InclusiFit is an AI-powered adaptive fashion and beauty platform that combines d
 
 ---
 
-## License
+## Photon Spectrum Integration
+
+InclusiFit runs on iMessage, WhatsApp, and Telegram via [Photon Spectrum](https://photon.codes).
+
+Users can interact with InclusiFit directly in their messaging app without opening a browser.
+
+```
+User: hi
+Bot:  Welcome to InclusiFit. Commands: afo, loose, dexterity, hair, beauty, shorter, catalog.
+      Send a photo for a free AI skin analysis.
+
+User: [sends selfie]
+Bot:  Skin Analysis Results:
+        Pores: 72/100
+        Moisture: 85/100
+        Radiance: 68/100
+      For personalized recommendations: https://inclusift.vercel.app/beauty
+
+User: afo
+Bot:  AFO-Compatible Footwear:
+      - AFO-Compatible Sneaker ($129.99) — Extra wide, fits over AFO braces, velcro
+      - Wide-Fit Slip-On Loafer ($79.99) — Wide fit, slip-on, no laces
+      Try them on: https://inclusift.vercel.app/shoes
+```
+
+See `bot/` directory for setup instructions.
+
+---
+
+
 
 MIT. Built for the Perfect Corp x Startup World Cup Hackathon 2026.
