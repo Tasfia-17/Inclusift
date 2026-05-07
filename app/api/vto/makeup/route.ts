@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-const API_KEY = process.env.PERFECT_CORP_API_KEY
+const API_KEY = process.env.PERFECT_CORP_API_KEY || 'sk-nAlDD07hAMNOq0L2yJTDNPnSDAf6kEASZasf9eXZkm_6VIQVISAxXfOp7f1VUBct'
 const BASE = 'https://yce-api-01.makeupar.com'
 
 // Default skin-smooth effect — works with skin_smooth category
