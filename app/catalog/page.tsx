@@ -75,13 +75,12 @@ function CatalogContent() {
                   <div className="caption" style={{ color: 'var(--graphite)', textTransform: 'capitalize', marginBottom: 4 }}>{p.category}</div>
                   <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--ink)', marginBottom: 4 }}>{p.name}</div>
                   <div className="small" style={{ color: 'var(--graphite)', marginBottom: 10, lineHeight: 1.4 }}>{p.desc}</div>
-                  {bs.length > 0 && (
+                  {/* Adaptive highlights — from new data */}
+                  {(p as any).adaptive_highlights?.length > 0 && (
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginBottom: 12 }}>
-                      {bs.slice(0,3).map(b => {
-                        const [label, colors] = BADGE[b] || [b, 'var(--fog) var(--graphite)']
-                        const [bg, fg] = colors.split(' ')
-                        return <span key={b} style={{ fontSize: 11, fontWeight: 500, padding: '3px 8px', borderRadius: 999, background: bg, color: fg }}>{label}</span>
-                      })}
+                      {((p as any).adaptive_highlights as string[]).slice(0,3).map((h: string) => (
+                        <span key={h} style={{ fontSize: 11, fontWeight: 500, padding: '3px 8px', borderRadius: 999, background: 'rgba(113,76,182,0.08)', color: 'var(--iris)', border: '1px solid rgba(113,76,182,0.15)' }}>{h}</span>
+                      ))}
                     </div>
                   )}
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>

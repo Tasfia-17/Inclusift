@@ -1,42 +1,58 @@
 import { NextRequest, NextResponse } from 'next/server'
 
 const API_KEY = process.env.PERFECT_CORP_API_KEY
-const BASE_URL = 'https://yce-api-01.makeupar.com'
+const BASE = 'https://yce-api-01.makeupar.com'
+
+// Map our internal names to Perfect Corp file endpoint names
+const FILE_ENDPOINT: Record<string, string> = {
+  'cloth':         'cloth',
+  'shoes':         'shoes',
+  'skin-analysis': 'skin-analysis',
+  'makeup-vto':    'makeup-vto',
+  'hair-color':    'hair-color',
+  'earring':       '2d-vto/earring',
+  'face':          'face-attr-analysis',
+}
 
 export async function POST(req: NextRequest) {
   try {
     const formData = await req.formData()
     const file = formData.get('file') as File
-    const api = formData.get('api') as string || 'cloth'
+    const apiName = (formData.get('api') as string) || 'cloth'
+    const endpoint = FILE_ENDPOINT[apiName] || apiName
 
     if (!file) return NextResponse.json({ error: 'No file' }, { status: 400 })
 
-    // Step 1: Get pre-signed upload URL
-    const uploadRes = await fetch(`${BASE_URL}/s2s/v2.0/file/${api}`, {
+    // 1. Get pre-signed upload URL
+    const uploadRes = await fetch(`${BASE}/s2s/v2.0/file/${endpoint}`, {
       method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${API_KEY}`,
-        'Content-Type': 'application/json'
-      }
+      headers: { 'Authorization': `Bearer ${API_KEY}`, 'Content-Type': 'application/json' }
     })
 
     if (!uploadRes.ok) {
       const err = await uploadRes.text()
+      console.error('Upload URL error:', err)
       return NextResponse.json({ error: err }, { status: uploadRes.status })
     }
 
-    const { file_id, upload_url } = await uploadRes.json()
+    const uploadData = await uploadRes.json()
+    const { file_id, upload_url } = uploadData.data || uploadData
 
-    // Step 2: Upload file to pre-signed URL
+    // 2. PUT file to pre-signed URL
     const buffer = await file.arrayBuffer()
-    await fetch(upload_url, {
+    const putRes = await fetch(upload_url, {
       method: 'PUT',
       body: buffer,
-      headers: { 'Content-Type': file.type }
+      headers: { 'Content-Type': file.type || 'image/jpeg' }
     })
+
+    if (!putRes.ok) {
+      return NextResponse.json({ error: 'Failed to upload to storage' }, { status: 500 })
+    }
 
     return NextResponse.json({ file_id })
   } catch (error: any) {
+    console.error('Upload error:', error)
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 }

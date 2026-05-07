@@ -120,18 +120,21 @@ function StudioContent() {
         markStep('makeup')
       } catch { /* non-fatal */ }
 
-      // Clothes VTO
+      // Clothes VTO — use a clean garment image
       setCurrentStep(4)
       try {
-        // Use a sample adaptive garment URL
-        const garmentUrl = 'https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?w=800'
+        // Adaptive wrap dress — clean product shot works best for VTO
+        const garmentUrl = 'https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=1200&q=95&fit=crop'
         const clothTask = await fetch('/api/vto/clothes', {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ src_file_id: file_id, cloth_file_url: garmentUrl })
         }).then(r => r.json())
-        const clothRes = await pollTask('clothes', clothTask?.data?.task_id || clothTask?.task_id)
-        setResults(p => ({ ...p, clothResult: clothRes.url }))
-        markStep('cloth')
+        const clothTaskId = clothTask?.data?.task_id || clothTask?.task_id
+        if (clothTaskId) {
+          const clothRes = await pollTask('clothes', clothTaskId)
+          setResults(p => ({ ...p, clothResult: clothRes.url }))
+          markStep('cloth')
+        }
       } catch { /* non-fatal */ }
 
       // Hair color VTO

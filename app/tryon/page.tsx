@@ -24,18 +24,25 @@ function TryOnContent() {
       const fd = new FormData()
       fd.append('file', fileRef.current.files[0])
       fd.append('api', 'cloth')
-      const { file_id } = await fetch('/api/vto/upload', { method:'POST', body:fd }).then(r=>r.json())
+      const uploadData = await fetch('/api/vto/upload', { method:'POST', body:fd }).then(r=>r.json())
+      if (!uploadData.file_id) throw new Error(uploadData.error || 'Upload failed')
       setStatus('processing')
-      const data = await fetch('/api/vto/clothes', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ src_file_id:file_id, cloth_file_url:product.garment_url }) }).then(r=>r.json())
-      const task_id = data?.data?.task_id || data?.task_id
-      for (let i=0; i<30; i++) {
-        await new Promise(r=>setTimeout(r,2000))
+      const garmentUrl = (product as any).garment_url || product.image
+      const taskData = await fetch('/api/vto/clothes', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({ src_file_id: uploadData.file_id, cloth_file_url: garmentUrl })
+      }).then(r=>r.json())
+      const task_id = taskData?.data?.task_id || taskData?.task_id
+      if (!task_id) throw new Error('No task ID returned')
+      for (let i=0; i<40; i++) {
+        await new Promise(r=>setTimeout(r,3000))
         const d = await fetch(`/api/vto/clothes/${task_id}`).then(r=>r.json())
-        if (d?.data?.task_status==='success') { setResult(d.data.results.url); setStatus('done'); speak('Your virtual try-on is ready.'); return }
-        if (d?.data?.task_status==='error') break
+        const s = d?.data?.task_status || d?.task_status
+        if (s==='success') { setResult(d?.data?.results?.url || d?.results?.url); setStatus('done'); speak('Your virtual try-on is ready.'); return }
+        if (s==='error') throw new Error('Processing failed')
       }
-      setStatus('error')
-    } catch { setStatus('error') }
+      throw new Error('Timed out')
+    } catch (e: any) { console.error('VTO error:', e); setStatus('error') }
   }
 
   if (!product) return (
@@ -59,6 +66,14 @@ function TryOnContent() {
               <div style={{ padding:'16px 20px 20px' }}>
                 <div style={{ fontSize:16, fontWeight:600, color:'var(--ink)' }}>{product.name}</div>
                 <div className="small" style={{ color:'var(--graphite)', marginTop:4 }}>{product.desc}</div>
+                {/* Adaptive highlights */}
+                {(product as any).adaptive_highlights?.length > 0 && (
+                  <div style={{ display:'flex', flexWrap:'wrap', gap:4, marginTop:10 }}>
+                    {((product as any).adaptive_highlights as string[]).map((h: string) => (
+                      <span key={h} style={{ fontSize:11, fontWeight:500, padding:'3px 8px', borderRadius:999, background:'rgba(113,76,182,0.08)', color:'var(--iris)', border:'1px solid rgba(113,76,182,0.15)' }}>{h}</span>
+                    ))}
+                  </div>
+                )}
                 <div style={{ fontSize:18, fontWeight:600, color:'var(--ink)', marginTop:10 }}>${product.price}</div>
               </div>
             </div>
