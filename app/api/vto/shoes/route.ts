@@ -3,11 +3,12 @@ const API_KEY = process.env.PERFECT_CORP_API_KEY
 const BASE = 'https://yce-api-01.makeupar.com'
 export async function POST(req: NextRequest) {
   try {
-    const { src_file_id, src_file_url, shoes_file_url } = await req.json()
-    const body: Record<string, any> = {}
+    const { src_file_id, src_file_url, shoes_file_url, ref_file_url, gender } = await req.json()
+    const body: Record<string, any> = { gender: gender || 'female' }
     if (src_file_id) body.src_file_id = src_file_id
     else if (src_file_url) body.src_file_url = src_file_url
-    if (shoes_file_url) body.shoes_file_url = shoes_file_url
+    const shoeUrl = ref_file_url || shoes_file_url
+    if (shoeUrl) body.ref_file_url = shoeUrl
     const res = await fetch(`${BASE}/s2s/v2.0/task/shoes`, {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${API_KEY}`, 'Content-Type': 'application/json' },

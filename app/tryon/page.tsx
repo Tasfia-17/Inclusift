@@ -30,7 +30,7 @@ function TryOnContent() {
       const garmentUrl = (product as any).garment_url || product.image
       const taskData = await fetch('/api/vto/clothes', {
         method:'POST', headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({ src_file_id: uploadData.file_id, cloth_file_url: garmentUrl })
+        body:JSON.stringify({ src_file_id: uploadData.file_id, ref_file_url: garmentUrl })
       }).then(r=>r.json())
       const task_id = taskData?.data?.task_id || taskData?.task_id
       if (!task_id) throw new Error('No task ID returned')

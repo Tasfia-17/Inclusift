@@ -1,30 +1,28 @@
 import { NextRequest, NextResponse } from 'next/server'
-
 const API_KEY = process.env.PERFECT_CORP_API_KEY
 const BASE = 'https://yce-api-01.makeupar.com'
 
+// Default skin-smooth effect — works with skin_smooth category
+const DEFAULT_EFFECTS = [{
+  category: 'skin_smooth',
+  palettes: [{ color: '#f5d5b0', opacity: 0.4, colorIntensity: 40, smoothness: 80, texture: 'natural', thickness: 40 }],
+  shape: 'natural',
+  style: { finish: 'natural' }
+}]
+
 export async function POST(req: NextRequest) {
   try {
-    const { src_file_id, src_file_url, makeup_items } = await req.json()
-
-    const payload: Record<string, any> = {
-      makeup_items: makeup_items || [
-        { type: 'foundation', color: '#e8c4a0' },
-        { type: 'lipstick', color: '#c2185b' }
-      ]
+    const { src_file_id, src_file_url, effects, makeup_items } = await req.json()
+    const body: Record<string, any> = {
+      effects: effects || DEFAULT_EFFECTS
     }
-    if (src_file_id) payload.src_file_id = src_file_id
-    else if (src_file_url) payload.src_file_url = src_file_url
-
+    if (src_file_id) body.src_file_id = src_file_id
+    else if (src_file_url) body.src_file_url = src_file_url
     const res = await fetch(`${BASE}/s2s/v2.0/task/makeup-vto`, {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${API_KEY}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
+      body: JSON.stringify(body)
     })
-
-    const data = await res.json()
-    return NextResponse.json(data)
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
-  }
+    return NextResponse.json(await res.json())
+  } catch (e: any) { return NextResponse.json({ error: e.message }, { status: 500 }) }
 }

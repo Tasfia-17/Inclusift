@@ -129,7 +129,7 @@ function StudioContent() {
         const garmentUrl = 'https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=1200&q=95&fit=crop'
         const clothTask = await fetch('/api/vto/clothes', {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ src_file_id: file_id, cloth_file_url: garmentUrl })
+          body: JSON.stringify({ src_file_id: file_id, ref_file_url: garmentUrl })
         }).then(r => r.json())
         const clothTaskId = clothTask?.data?.task_id || clothTask?.task_id
         if (clothTaskId) {
