@@ -68,119 +68,104 @@ function StudioContent() {
     setCompletedSteps([])
     setResults({})
 
+    // Determine which APIs to run based on conditions
+    const runSkin     = true // always run skin analysis
+    const runMakeup   = conditions.includes('limited_dexterity') || conditions.includes('visual_impairment') || conditions.length === 0
+    const runCloth    = conditions.includes('shorter_limbs') || conditions.includes('limited_dexterity') || conditions.includes('loose_fit') || conditions.length === 0
+    const runHair     = conditions.includes('hair_loss') || conditions.length === 0
+    const runEarring  = conditions.includes('hearing_aid') || conditions.length === 0
+
     try {
       // Step 1: Upload
       setCurrentStep(0)
       const fd = new FormData()
       fd.append('file', fileRef.current.files[0])
       fd.append('api', 'skin-analysis')
-      const { file_id } = await fetch('/api/vto/upload', { method: 'POST', body: fd }).then(r => r.json())
+      const uploadData = await fetch('/api/vto/upload', { method: 'POST', body: fd }).then(r => r.json())
+      if (!uploadData.file_id) throw new Error(uploadData.error || 'Upload failed')
+      const file_id = uploadData.file_id
       fileIdRef.current = file_id
       markStep('upload')
 
-      // Steps 2-7: Run in parallel where possible
-      // Skin analysis
-      setCurrentStep(1)
-      const skinTask = await fetch('/api/vto/skin', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ src_file_id: file_id })
-      }).then(r => r.json())
-
-      // Face analysis (parallel with skin)
-      setCurrentStep(2)
-      const faceTask = await fetch('/api/vto/face', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ src_file_id: file_id })
-      }).then(r => r.json())
-
-      // Poll skin + face in parallel
-      const [skinRes, faceRes] = await Promise.allSettled([
-        pollTask('skin', skinTask?.data?.task_id),
-        pollTask('face', faceTask?.data?.task_id),
-      ])
-
-      if (skinRes.status === 'fulfilled') {
-        setResults(p => ({ ...p, skinScores: skinRes.value.scores, skinOverlay: skinRes.value.overlay_url || skinRes.value.url }))
-        markStep('skin')
-        const top = Object.entries(skinRes.value.scores || {}).sort(([,a],[,b]) => (a as number)-(b as number)).slice(0,2).map(([k]) => CONCERN_LABELS[k]).join(' and ')
-        speak(`Skin analysis complete. Top concerns: ${top}.`)
-      }
-      if (faceRes.status === 'fulfilled') {
-        setResults(p => ({ ...p, faceAttrs: faceRes.value }))
-        markStep('face')
+      // Step 2: Skin analysis (always)
+      if (runSkin) {
+        setCurrentStep(1)
+        try {
+          const skinTask = await fetch('/api/vto/skin', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ src_file_id: file_id })
+          }).then(r => r.json())
+          const skinRes = await pollTask('skin', skinTask?.data?.task_id)
+          setResults(p => ({ ...p, skinScores: skinRes.scores, skinOverlay: skinRes.overlay_url || skinRes.url }))
+          markStep('skin')
+          const top = Object.entries(skinRes.scores || {}).sort(([,a],[,b]) => (a as number)-(b as number)).slice(0,2).map(([k]) => CONCERN_LABELS[k]).join(' and ')
+          speak(`Skin analysis complete. Top concerns: ${top}.`)
+        } catch { /* non-fatal */ }
       }
 
-      // Makeup VTO
-      setCurrentStep(3)
-      try {
-        const makeupTask = await fetch('/api/vto/makeup', {
-          method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ src_file_id: file_id, makeup_items: [{ type: 'foundation' }, { type: 'lipstick', color: '#c2185b' }] })
-        }).then(r => r.json())
-        const makeupRes = await pollTask('makeup', makeupTask?.data?.task_id)
-        setResults(p => ({ ...p, makeupResult: makeupRes.url }))
-        markStep('makeup')
-      } catch { /* non-fatal */ }
+      // Step 3: Makeup VTO
+      if (runMakeup) {
+        setCurrentStep(3)
+        try {
+          const makeupTask = await fetch('/api/vto/makeup', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ src_file_id: file_id })
+          }).then(r => r.json())
+          const makeupRes = await pollTask('makeup', makeupTask?.data?.task_id)
+          setResults(p => ({ ...p, makeupResult: makeupRes.url }))
+          markStep('makeup')
+        } catch { /* non-fatal */ }
+      }
 
-      // Clothes VTO — use a clean garment image
-      setCurrentStep(4)
-      try {
-        // Adaptive wrap dress — clean product shot works best for VTO
-        const garmentUrl = 'https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=1200&q=95&fit=crop'
-        const clothTask = await fetch('/api/vto/clothes', {
-          method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ src_file_id: file_id, ref_file_url: garmentUrl })
-        }).then(r => r.json())
-        const clothTaskId = clothTask?.data?.task_id || clothTask?.task_id
-        if (clothTaskId) {
-          const clothRes = await pollTask('clothes', clothTaskId)
-          setResults(p => ({ ...p, clothResult: clothRes.url }))
-          markStep('cloth')
-        }
-      } catch { /* non-fatal */ }
+      // Step 4: Clothes VTO
+      if (runCloth) {
+        setCurrentStep(4)
+        try {
+          const garmentUrl = 'https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=1200&q=95&fit=crop'
+          const clothTask = await fetch('/api/vto/clothes', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ src_file_id: file_id, ref_file_url: garmentUrl })
+          }).then(r => r.json())
+          const clothTaskId = clothTask?.data?.task_id || clothTask?.task_id
+          if (clothTaskId) {
+            const clothRes = await pollTask('clothes', clothTaskId)
+            setResults(p => ({ ...p, clothResult: clothRes.url }))
+            markStep('cloth')
+          }
+        } catch { /* non-fatal */ }
+      }
 
-      // Hair color VTO
-      setCurrentStep(5)
-      try {
-        const hairTask = await fetch('/api/vto/hair', {
-          method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ src_file_id: file_id, hair_color: '#8B4513' })
-        }).then(r => r.json())
-        const hairRes = await pollTask('hair', hairTask?.data?.task_id)
-        setResults(p => ({ ...p, hairResult: hairRes.url }))
-        markStep('hair')
-      } catch { /* non-fatal */ }
+      // Step 5: Hair VTO
+      if (runHair) {
+        setCurrentStep(5)
+        try {
+          const hairTask = await fetch('/api/vto/hair', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ src_file_id: file_id, hair_color: '#8B4513' })
+          }).then(r => r.json())
+          const hairRes = await pollTask('hair', hairTask?.data?.task_id)
+          setResults(p => ({ ...p, hairResult: hairRes.url }))
+          markStep('hair')
+        } catch { /* non-fatal */ }
+      }
 
-      // Hairstyle generator (wig style)
-      setCurrentStep(6)
-      try {
-        const hairstyleTask = await fetch('/api/vto/hairstyle', {
-          method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ src_file_id: file_id })
-        }).then(r => r.json())
-        const hairstyleTaskId = hairstyleTask?.data?.task_id || hairstyleTask?.task_id
-        if (hairstyleTaskId) {
-          const hairstyleRes = await pollTask('hairstyle', hairstyleTaskId)
-          setResults(p => ({ ...p, hairstyleResult: hairstyleRes.url }))
-          markStep('hairstyle')
-        }
-      } catch { /* non-fatal */ }
-
-      // Earring VTO
-      setCurrentStep(7)
-      try {
-        const earringTask = await fetch('/api/vto/earring', {
-          method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ src_file_id: file_id })
-        }).then(r => r.json())
-        const earringRes = await pollTask('earring', earringTask?.data?.task_id)
-        setResults(p => ({ ...p, earringResult: earringRes.url }))
-        markStep('earring')
-      } catch { /* non-fatal */ }
+      // Step 6: Earring VTO
+      if (runEarring) {
+        setCurrentStep(6)
+        try {
+          const earringTask = await fetch('/api/vto/earring', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ src_file_id: file_id })
+          }).then(r => r.json())
+          const earringRes = await pollTask('earring', earringTask?.data?.task_id)
+          setResults(p => ({ ...p, earringResult: earringRes.url }))
+          markStep('earring')
+        } catch { /* non-fatal */ }
+      }
 
       setStatus('done')
       setCurrentStep(-1)
-      speak('Your AI analysis is complete! All results are ready.')
+      speak('Your AI analysis is complete.')
     } catch (e) {
       setStatus('error')
     }
@@ -245,7 +230,7 @@ function StudioContent() {
               <button onClick={runAll} disabled={!preview || status === 'running'}
                 className="btn btn-accent"
                 style={{ width: '100%', marginTop: 12, fontSize: 14, padding: '12px 0', borderRadius: 12, opacity: (!preview || status === 'running') ? 0.4 : 1, cursor: (!preview || status === 'running') ? 'not-allowed' : 'pointer' }}>
-                {status === 'running' ? '⏳ Running AI analysis...' : '✦ Run all 6 APIs'}
+                {status === 'running' ? '⏳ Running AI analysis...' : `✦ Run ${conditions.length > 0 ? 'personalized' : 'full'} analysis`}
               </button>
             </div>
 
