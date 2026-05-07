@@ -3,144 +3,113 @@ import { useState, useEffect, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { Navbar } from '@/components/Navbar'
-import { SlidersHorizontal, Sparkles, X } from 'lucide-react'
 import products from '@/data/products.json'
 
-const CATEGORY_ICONS: Record<string, string> = {
-  all: '🛍️', clothing: '👗', footwear: '👟', beauty: '✨', hair: '💇', jewelry: '💍'
+const CATS = ['all','clothing','footwear','beauty','hair','jewelry']
+
+const BADGE: Record<string, [string,string]> = {
+  magnetic_snap:  ['Magnetic snap',  '#ede9fe #5b21b6'],
+  velcro:         ['Velcro',         '#dbeafe #1d4ed8'],
+  elastic:        ['Elastic waist',  '#dcfce7 #15803d'],
+  loose:          ['Loose fit',      '#fef3c7 #92400e'],
+  afo_compatible: ['AFO ✓',          '#fef9c3 #854d0e'],
+  pump:           ['Pump dispenser', '#ccfbf1 #0f766e'],
+  front_opening:  ['Front opening',  '#fce7f3 #9d174d'],
 }
 
-const ADAPTIVE_BADGES: Record<string, { label: string; color: string }> = {
-  magnetic_snap: { label: 'Magnetic snap', color: 'bg-brand-100 text-brand-700' },
-  velcro: { label: 'Velcro', color: 'bg-blush-100 text-blush-700' },
-  elastic: { label: 'Elastic waist', color: 'bg-mint-100 text-mint-700' },
-  loose: { label: 'Loose fit', color: 'bg-violet-100 text-violet-700' },
-  afo_compatible: { label: 'AFO compatible', color: 'bg-amber-100 text-amber-700' },
-  pump: { label: 'Pump dispenser', color: 'bg-sky-100 text-sky-700' },
-  front_opening: { label: 'Front opening', color: 'bg-rose-100 text-rose-700' },
-}
-
-function getAdaptiveBadges(product: any): string[] {
-  const a = product.adaptive || {}
-  const badges: string[] = []
-  if (a.closure_type === 'magnetic_snap') badges.push('magnetic_snap')
-  if (a.closure_type === 'velcro') badges.push('velcro')
-  if (a.waistband === 'elastic') badges.push('elastic')
-  if (a.fit_style === 'loose') badges.push('loose')
-  if (a.afo_compatible) badges.push('afo_compatible')
-  if (a.container_type === 'pump') badges.push('pump')
-  if (a.dressing_method === 'front_opening') badges.push('front_opening')
-  return badges
+function getBadges(p: any) {
+  const a = p.adaptive || {}
+  const b: string[] = []
+  if (a.closure_type === 'magnetic_snap') b.push('magnetic_snap')
+  if (a.closure_type === 'velcro') b.push('velcro')
+  if (a.waistband === 'elastic') b.push('elastic')
+  if (a.fit_style === 'loose') b.push('loose')
+  if (a.afo_compatible) b.push('afo_compatible')
+  if (a.container_type === 'pump') b.push('pump')
+  if (a.dressing_method === 'front_opening') b.push('front_opening')
+  return b
 }
 
 function CatalogContent() {
-  const searchParams = useSearchParams()
-  const conditions = searchParams.get('conditions')?.split(',').filter(Boolean) || []
-  const [category, setCategory] = useState('all')
-  const [filtered, setFiltered] = useState(products)
+  const sp = useSearchParams()
+  const conditions = sp.get('c')?.split(',').filter(Boolean) || []
+  const [cat, setCat] = useState('all')
+  const [list, setList] = useState(products)
 
   useEffect(() => {
-    let result = products
-    if (conditions.length > 0) {
-      result = result.filter(p => p.tags.some(t => conditions.includes(t)))
-    }
-    if (category !== 'all') {
-      result = result.filter(p => p.category === category)
-    }
-    setFiltered(result)
-  }, [conditions.join(','), category])
+    let r = products
+    if (conditions.length) r = r.filter(p => p.tags.some(t => conditions.includes(t)))
+    if (cat !== 'all') r = r.filter(p => p.category === cat)
+    setList(r)
+  }, [conditions.join(','), cat])
 
   return (
-    <div className="min-h-screen" style={{background:'#faf5ff'}}>
+    <div style={{ background: 'var(--canvas)', minHeight: '100vh' }}>
       <Navbar />
-      <div className="max-w-7xl mx-auto px-6 pt-28 pb-20">
+      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '96px 24px 80px' }}>
 
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-extrabold text-gray-900">Adaptive Catalog</h1>
-          <p className="text-gray-500 mt-1">Products designed for your body and your life</p>
+        <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 24 }}>
+          <div>
+            <h1 className="serif" style={{ fontSize: 32, color: 'var(--ink)' }}>Adaptive Catalog</h1>
+            <p style={{ fontSize: 13, color: 'var(--muted)', marginTop: 4 }}>
+              {list.length} products{conditions.length ? ' · filtered for your profile' : ''}
+            </p>
+          </div>
+          {conditions.length > 0 && (
+            <Link href="/profile" style={{ fontSize: 13, color: 'var(--accent)', textDecoration: 'none' }}>Edit profile</Link>
+          )}
         </div>
 
-        {/* Active filters */}
-        {conditions.length > 0 && (
-          <div className="glass-purple rounded-2xl p-4 mb-6 border border-brand-200/30 flex items-center gap-3 flex-wrap">
-            <div className="flex items-center gap-1.5 text-sm font-semibold text-brand-700">
-              <SlidersHorizontal size={14} />
-              Active filters:
-            </div>
-            {conditions.map(c => (
-              <span key={c} className="bg-brand-600 text-white text-xs font-medium px-3 py-1 rounded-full">
-                {c.replace(/_/g, ' ')}
-              </span>
-            ))}
-            <Link href="/profile" className="ml-auto text-xs text-gray-400 hover:text-brand-600 flex items-center gap-1">
-              <X size={12} /> Edit profile
-            </Link>
-          </div>
-        )}
-
         {/* Category tabs */}
-        <div className="flex gap-2 mb-8 overflow-x-auto pb-2">
-          {Object.entries(CATEGORY_ICONS).map(([cat, icon]) => (
-            <button
-              key={cat}
-              onClick={() => setCategory(cat)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all ${
-                category === cat
-                  ? 'bg-gradient-to-r from-brand-600 to-blush-500 text-white shadow-lg shadow-brand-500/25'
-                  : 'bg-white/70 text-gray-600 hover:bg-white border border-gray-200/60'
-              }`}
-            >
-              <span>{icon}</span>
-              <span className="capitalize">{cat === 'all' ? 'All Products' : cat}</span>
+        <div style={{ display: 'flex', gap: 6, marginBottom: 32, overflowX: 'auto', paddingBottom: 4 }}>
+          {CATS.map(c => (
+            <button key={c} onClick={() => setCat(c)} style={{
+              padding: '7px 16px', borderRadius: 9999, fontSize: 13, fontWeight: 500,
+              border: 'none', cursor: 'pointer', whiteSpace: 'nowrap', transition: 'all 0.15s',
+              background: cat === c ? 'var(--ink)' : 'var(--surface)',
+              color: cat === c ? 'var(--canvas)' : 'var(--muted)',
+              boxShadow: cat === c ? 'none' : '#e8e6e3 0px 0px 0px 1px inset',
+            }}>
+              {c === 'all' ? 'All' : c.charAt(0).toUpperCase() + c.slice(1)}
             </button>
           ))}
         </div>
 
         {/* Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filtered.map(p => {
-            const badges = getAdaptiveBadges(p)
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(280px,1fr))', gap: 16 }}>
+          {list.map(p => {
+            const bs = getBadges(p)
             return (
-              <div key={p.id} className="group bg-white/80 backdrop-blur-sm rounded-3xl overflow-hidden border border-brand-100/40 shadow-card hover:shadow-card-hover hover:-translate-y-1 transition-all duration-300">
-                <div className="relative overflow-hidden h-56">
-                  <img src={p.image} alt={p.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
-                  <div className="absolute top-3 left-3">
-                    <span className="bg-white/90 backdrop-blur-sm text-xs font-semibold text-gray-700 px-2.5 py-1 rounded-full capitalize">
-                      {p.category}
-                    </span>
-                  </div>
-                  {badges.includes('afo_compatible') && (
-                    <div className="absolute top-3 right-3 bg-amber-500 text-white text-xs font-bold px-2.5 py-1 rounded-full">
-                      AFO ✓
-                    </div>
-                  )}
+              <div key={p.id} className="card" style={{ overflow: 'hidden', transition: 'transform 0.2s ease, box-shadow 0.2s ease' }}
+                onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = 'rgba(0,0,0,0.1) 0px 0px 0px 1px, rgba(0,0,0,0.08) 0px 8px 24px' }}
+                onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'rgba(0,0,0,0.06) 0px 0px 0px 1px, rgba(0,0,0,0.04) 0px 2px 8px' }}>
+                <div style={{ height: 200, overflow: 'hidden', background: 'var(--stone)' }}>
+                  <img src={p.image} alt={p.name} style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.4s ease' }}
+                    onMouseEnter={e => (e.currentTarget.style.transform = 'scale(1.04)')}
+                    onMouseLeave={e => (e.currentTarget.style.transform = 'scale(1)')} />
                 </div>
+                <div style={{ padding: '16px 16px 20px' }}>
+                  <div style={{ fontSize: 11, color: 'var(--muted)', textTransform: 'capitalize', marginBottom: 4 }}>{p.category}</div>
+                  <div style={{ fontWeight: 600, fontSize: 14, color: 'var(--ink)', marginBottom: 4 }}>{p.name}</div>
+                  <div style={{ fontSize: 13, color: 'var(--body)', marginBottom: 10, lineHeight: 1.4, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{p.desc}</div>
 
-                <div className="p-5">
-                  <h3 className="font-bold text-gray-900 mb-1">{p.name}</h3>
-                  <p className="text-sm text-gray-500 mb-3 line-clamp-2">{p.desc}</p>
-
-                  {/* Adaptive badges */}
-                  {badges.length > 0 && (
-                    <div className="flex flex-wrap gap-1.5 mb-4">
-                      {badges.slice(0, 3).map(b => (
-                        <span key={b} className={`text-xs font-medium px-2 py-0.5 rounded-full ${ADAPTIVE_BADGES[b]?.color || 'bg-gray-100 text-gray-600'}`}>
-                          {ADAPTIVE_BADGES[b]?.label || b}
-                        </span>
-                      ))}
+                  {bs.length > 0 && (
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginBottom: 12 }}>
+                      {bs.slice(0,3).map(b => {
+                        const [label, colors] = BADGE[b] || [b, '#f3f4f6 #374151']
+                        const [bg, fg] = colors.split(' ')
+                        return (
+                          <span key={b} className="tag" style={{ background: bg, color: fg }}>{label}</span>
+                        )
+                      })}
                     </div>
                   )}
 
-                  <div className="flex items-center justify-between">
-                    <span className="text-xl font-extrabold text-gray-900">${p.price}</span>
-                    <Link
-                      href={p.category === 'beauty' ? '/beauty' : `/tryon?product=${p.id}`}
-                      className="flex items-center gap-1.5 bg-gradient-to-r from-brand-600 to-blush-500 text-white text-sm font-semibold px-4 py-2 rounded-xl shadow-sm hover:shadow-brand-500/30 hover:scale-105 transition-all"
-                    >
-                      <Sparkles size={14} />
-                      {p.category === 'beauty' ? 'Analyze' : 'Try On'}
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <span style={{ fontWeight: 700, fontSize: 16, color: 'var(--ink)' }}>${p.price}</span>
+                    <Link href={p.category === 'beauty' ? '/beauty' : `/tryon?product=${p.id}`}
+                      className="btn-primary" style={{ fontSize: 12, padding: '7px 14px' }}>
+                      {p.category === 'beauty' ? 'Analyze' : 'Try on'}
                     </Link>
                   </div>
                 </div>
@@ -149,11 +118,11 @@ function CatalogContent() {
           })}
         </div>
 
-        {filtered.length === 0 && (
-          <div className="text-center py-20">
-            <div className="text-6xl mb-4">🔍</div>
-            <h3 className="text-xl font-bold text-gray-700 mb-2">No products match your filters</h3>
-            <Link href="/profile" className="text-brand-600 underline text-sm">Update your profile</Link>
+        {list.length === 0 && (
+          <div style={{ textAlign: 'center', padding: '80px 0', color: 'var(--muted)' }}>
+            <div style={{ fontSize: 40, marginBottom: 12 }}>🔍</div>
+            <div style={{ fontWeight: 500 }}>No products match your filters</div>
+            <Link href="/profile" style={{ fontSize: 13, color: 'var(--accent)', marginTop: 8, display: 'inline-block' }}>Update profile</Link>
           </div>
         )}
       </div>
@@ -163,11 +132,7 @@ function CatalogContent() {
 
 export default function CatalogPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen animated-gradient flex items-center justify-center">
-        <div className="shimmer w-64 h-8 rounded-full" />
-      </div>
-    }>
+    <Suspense fallback={<div style={{ minHeight: '100vh', background: 'var(--canvas)' }} />}>
       <CatalogContent />
     </Suspense>
   )

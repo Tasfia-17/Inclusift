@@ -2,74 +2,52 @@
 import { useState, useRef } from 'react'
 import Link from 'next/link'
 import { Navbar } from '@/components/Navbar'
-import { Upload, Sparkles, Volume2, Mic } from 'lucide-react'
 import products from '@/data/products.json'
 
-const CONCERN_LABELS: Record<string, { label: string; icon: string }> = {
-  hd_acne:              { label: 'Acne',          icon: '🔴' },
-  hd_pore:              { label: 'Pores',          icon: '🔵' },
-  hd_moisture:          { label: 'Moisture',       icon: '💧' },
-  hd_redness:           { label: 'Redness',        icon: '🌹' },
-  hd_texture:           { label: 'Texture',        icon: '🌊' },
-  hd_wrinkle:           { label: 'Wrinkles',       icon: '〰️' },
-  hd_radiance:          { label: 'Radiance',       icon: '✨' },
-  hd_oiliness:          { label: 'Oiliness',       icon: '💫' },
-  hd_eye_bag:           { label: 'Eye Bags',       icon: '👁️' },
-  hd_dark_circle:       { label: 'Dark Circles',   icon: '🌑' },
-  hd_firmness:          { label: 'Firmness',       icon: '💪' },
-  hd_age_spot:          { label: 'Age Spots',      icon: '🟤' },
+const CONCERNS: Record<string, string> = {
+  hd_acne:'Acne', hd_pore:'Pores', hd_moisture:'Moisture', hd_redness:'Redness',
+  hd_texture:'Texture', hd_wrinkle:'Wrinkles', hd_radiance:'Radiance', hd_oiliness:'Oiliness',
+  hd_eye_bag:'Eye Bags', hd_dark_circle:'Dark Circles', hd_firmness:'Firmness', hd_age_spot:'Age Spots',
 }
 
 const beautyProducts = products.filter(p => p.category === 'beauty')
-type Status = 'idle' | 'uploading' | 'processing' | 'done' | 'error'
+type S = 'idle'|'uploading'|'processing'|'done'|'error'
 
 export default function BeautyPage() {
-  const [status, setStatus] = useState<Status>('idle')
-  const [scores, setScores] = useState<Record<string, number> | null>(null)
-  const [overlayUrl, setOverlayUrl] = useState<string | null>(null)
-  const [userPhoto, setUserPhoto] = useState<string | null>(null)
-  const [makeupResult, setMakeupResult] = useState<string | null>(null)
+  const [status, setStatus] = useState<S>('idle')
+  const [scores, setScores] = useState<Record<string,number>|null>(null)
+  const [overlay, setOverlay] = useState<string|null>(null)
+  const [preview, setPreview] = useState<string|null>(null)
+  const [makeupResult, setMakeupResult] = useState<string|null>(null)
   const [makeupLoading, setMakeupLoading] = useState(false)
   const fileRef = useRef<HTMLInputElement>(null)
-  const uploadedFileId = useRef<string | null>(null)
+  const fileId = useRef<string|null>(null)
 
-  const speak = (text: string) => {
-    if ('speechSynthesis' in window) { window.speechSynthesis.cancel(); window.speechSynthesis.speak(new SpeechSynthesisUtterance(text)) }
-  }
+  const speak = (t: string) => 'speechSynthesis' in window && (window.speechSynthesis.cancel(), window.speechSynthesis.speak(new SpeechSynthesisUtterance(t)))
 
-  const handleAnalyze = async () => {
+  const analyze = async () => {
     if (!fileRef.current?.files?.[0]) return
     setStatus('uploading')
     try {
-      const formData = new FormData()
-      formData.append('file', fileRef.current.files[0])
-      formData.append('api', 'skin-analysis')
-      const uploadRes = await fetch('/api/vto/upload', { method: 'POST', body: formData })
-      const { file_id } = await uploadRes.json()
-      uploadedFileId.current = file_id
-
+      const fd = new FormData()
+      fd.append('file', fileRef.current.files[0])
+      fd.append('api', 'skin-analysis')
+      const { file_id } = await fetch('/api/vto/upload', { method:'POST', body:fd }).then(r=>r.json())
+      fileId.current = file_id
       setStatus('processing')
-      const taskRes = await fetch('/api/vto/skin', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const { data: td } = await fetch('/api/vto/skin', {
+        method:'POST', headers:{'Content-Type':'application/json'},
         body: JSON.stringify({ src_file_id: file_id })
-      })
-      const { data: taskData } = await taskRes.json()
-      const task_id = taskData?.task_id
-
-      for (let i = 0; i < 30; i++) {
-        await new Promise(r => setTimeout(r, 2000))
-        const poll = await fetch(`/api/vto/skin/${task_id}`)
-        const d = await poll.json()
-        if (d?.data?.task_status === 'success') {
-          const results = d.data.results
-          setScores(results.scores || {})
-          setOverlayUrl(results.overlay_url || results.url || null)
+      }).then(r=>r.json())
+      for (let i=0; i<30; i++) {
+        await new Promise(r=>setTimeout(r,2000))
+        const d = await fetch(`/api/vto/skin/${td?.task_id}`).then(r=>r.json())
+        if (d?.data?.task_status==='success') {
+          setScores(d.data.results.scores||{})
+          setOverlay(d.data.results.overlay_url||d.data.results.url||null)
           setStatus('done')
-          const topConcerns = Object.entries(results.scores || {})
-            .sort(([,a],[,b]) => (a as number) - (b as number))
-            .slice(0, 3).map(([k]) => CONCERN_LABELS[k]?.label || k).join(', ')
-          speak(`Skin analysis complete. Your top concerns are: ${topConcerns}. Scroll down to see recommended products.`)
+          const top = Object.entries(d.data.results.scores||{}).sort(([,a],[,b])=>(a as number)-(b as number)).slice(0,3).map(([k])=>CONCERNS[k]).join(', ')
+          speak(`Analysis complete. Top concerns: ${top}.`)
           return
         }
       }
@@ -77,137 +55,99 @@ export default function BeautyPage() {
     } catch { setStatus('error') }
   }
 
-  const handleMakeupVTO = async (productId: string) => {
-    if (!uploadedFileId.current) return
+  const tryMakeup = async () => {
+    if (!fileId.current) return
     setMakeupLoading(true)
     try {
-      const taskRes = await fetch('/api/vto/makeup', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ src_file_id: uploadedFileId.current, makeup_items: [{ type: 'foundation' }] })
-      })
-      const { data } = await taskRes.json()
-      const task_id = data?.task_id
-      for (let i = 0; i < 20; i++) {
-        await new Promise(r => setTimeout(r, 2000))
-        const poll = await fetch(`/api/vto/makeup/${task_id}`)
-        const d = await poll.json()
-        if (d?.data?.task_status === 'success') {
-          setMakeupResult(d.data.results.url)
-          speak('Makeup try-on is ready!')
-          break
-        }
+      const { data } = await fetch('/api/vto/makeup', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ src_file_id: fileId.current, makeup_items:[{type:'foundation'}] })
+      }).then(r=>r.json())
+      for (let i=0; i<20; i++) {
+        await new Promise(r=>setTimeout(r,2000))
+        const d = await fetch(`/api/vto/makeup/${data?.task_id}`).then(r=>r.json())
+        if (d?.data?.task_status==='success') { setMakeupResult(d.data.results.url); speak('Makeup try-on ready.'); break }
       }
     } finally { setMakeupLoading(false) }
   }
 
-  const getScoreColor = (score: number) => {
-    if (score >= 80) return 'bg-green-400'
-    if (score >= 60) return 'bg-yellow-400'
-    return 'bg-red-400'
-  }
+  const scoreColor = (s: number) => s>=75 ? '#22c55e' : s>=50 ? '#f59e0b' : '#ef4444'
 
   return (
-    <div className="min-h-screen" style={{background:'#faf5ff'}}>
+    <div style={{ background:'var(--canvas)', minHeight:'100vh' }}>
       <Navbar />
-      <div className="max-w-5xl mx-auto px-6 pt-28 pb-20">
+      <div style={{ maxWidth:900, margin:'0 auto', padding:'96px 24px 80px' }}>
+        <Link href="/catalog" style={{ fontSize:13, color:'var(--muted)', textDecoration:'none', display:'inline-block', marginBottom:24 }}>← Catalog</Link>
 
-        {/* Header */}
-        <div className="flex items-start justify-between mb-8">
-          <div>
-            <Link href="/catalog" className="text-sm text-brand-600 mb-3 inline-block">← Catalog</Link>
-            <h1 className="text-3xl font-extrabold text-gray-900">AI Skin Analysis</h1>
-            <p className="text-gray-500 mt-1">12 concerns · HD accuracy · Products filtered for your needs</p>
-          </div>
-          <button
-            onClick={() => speak('Welcome to InclusiFit Beauty. Upload your selfie for a personalized skin analysis. Results will be read aloud automatically.')}
-            className="flex items-center gap-2 glass-purple border border-brand-200/40 text-brand-700 text-sm font-medium px-4 py-2 rounded-xl hover:bg-brand-50 transition"
-            aria-label="Read page description aloud"
-          >
-            <Volume2 size={16} /> Read Aloud
-          </button>
+        <div style={{ marginBottom:32 }}>
+          <h1 className="serif" style={{ fontSize:32, color:'var(--ink)' }}>AI Skin Analysis</h1>
+          <p style={{ fontSize:14, color:'var(--muted)', marginTop:4 }}>12 concerns · HD accuracy · Products filtered for your needs</p>
         </div>
 
-        {/* Upload section */}
-        <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-6 border border-brand-100/40 shadow-card mb-8">
-          <div className="grid md:grid-cols-2 gap-6 items-center">
+        {/* Upload */}
+        <div className="card" style={{ padding:24, marginBottom:24 }}>
+          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:24, alignItems:'start' }}>
             <div>
-              <h3 className="font-bold text-gray-900 mb-1">Upload your selfie</h3>
-              <p className="text-sm text-gray-400 mb-4">Close-up face photo · Good lighting · No glasses</p>
-              <label className="block cursor-pointer">
-                <input ref={fileRef} type="file" accept="image/jpeg,image/png" className="hidden"
-                  onChange={e => { const f = e.target.files?.[0]; if (f) setUserPhoto(URL.createObjectURL(f)) }}
-                  aria-label="Upload selfie for skin analysis"
-                />
-                <div className={`border-2 border-dashed rounded-2xl p-5 text-center transition-all ${
-                  userPhoto ? 'border-brand-300 bg-brand-50/50' : 'border-gray-200 hover:border-brand-300 hover:bg-brand-50/30'
-                }`}>
-                  {userPhoto
-                    ? <img src={userPhoto} alt="Your selfie" className="w-full h-36 object-cover rounded-xl" />
-                    : <div className="text-gray-400"><Upload size={28} className="mx-auto mb-2 text-brand-300" /><div className="text-sm">Click to upload selfie</div></div>
+              <div style={{ fontWeight:500, fontSize:14, color:'var(--ink)', marginBottom:4 }}>Upload a selfie</div>
+              <div style={{ fontSize:12, color:'var(--muted)', marginBottom:12 }}>Close-up face · Good lighting · No glasses</div>
+              <label style={{ display:'block', cursor:'pointer' }}>
+                <input ref={fileRef} type="file" accept="image/jpeg,image/png" style={{ display:'none' }}
+                  onChange={e => { const f=e.target.files?.[0]; if(f) setPreview(URL.createObjectURL(f)) }}
+                  aria-label="Upload selfie for skin analysis" />
+                <div style={{
+                  border:`2px dashed ${preview?'#c4b5fd':'var(--border)'}`,
+                  borderRadius:10, padding:16, textAlign:'center',
+                  background:preview?'#faf5ff':'var(--stone)', transition:'all 0.15s',
+                }}>
+                  {preview
+                    ? <img src={preview} alt="Selfie" style={{ width:'100%', height:140, objectFit:'cover', borderRadius:8 }} />
+                    : <div style={{ color:'var(--muted)', padding:'16px 0' }}><div style={{ fontSize:24, marginBottom:6 }}>🤳</div><div style={{ fontSize:13 }}>Click to upload</div></div>
                   }
                 </div>
               </label>
             </div>
-            <div className="space-y-3">
-              <div className="glass-purple rounded-2xl p-4 border border-brand-100/30">
-                <div className="text-sm font-semibold text-gray-700 mb-2">What we analyze:</div>
-                <div className="grid grid-cols-2 gap-1">
-                  {Object.values(CONCERN_LABELS).slice(0,8).map(c => (
-                    <div key={c.label} className="text-xs text-gray-500 flex items-center gap-1">
-                      <span>{c.icon}</span> {c.label}
-                    </div>
-                  ))}
+            <div style={{ display:'flex', flexDirection:'column', gap:12 }}>
+              <div style={{ background:'var(--stone)', borderRadius:10, padding:16 }}>
+                <div style={{ fontSize:12, fontWeight:500, color:'var(--muted)', marginBottom:8 }}>Analyzes 12 concerns</div>
+                <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:3 }}>
+                  {Object.values(CONCERNS).map(c => <div key={c} style={{ fontSize:12, color:'var(--body)' }}>· {c}</div>)}
                 </div>
               </div>
-              <button
-                onClick={handleAnalyze}
-                disabled={!userPhoto || status === 'uploading' || status === 'processing'}
-                className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-brand-600 to-blush-500 text-white font-bold py-3.5 rounded-2xl shadow-lg shadow-brand-500/30 hover:shadow-brand-500/50 hover:scale-[1.02] disabled:opacity-40 disabled:cursor-not-allowed transition-all"
-              >
-                <Sparkles size={18} />
-                {status === 'uploading' ? 'Uploading...' :
-                 status === 'processing' ? 'Analyzing (7 sec)...' :
-                 'Analyze My Skin'}
+              <button onClick={analyze} disabled={!preview||status==='uploading'||status==='processing'}
+                className="btn-primary"
+                style={{ justifyContent:'center', fontSize:14, padding:'11px 0', opacity:(!preview||status==='uploading'||status==='processing')?0.4:1, cursor:(!preview||status==='uploading'||status==='processing')?'not-allowed':'pointer' }}>
+                {status==='uploading'?'Uploading...':status==='processing'?'Analyzing...':'Analyze my skin'}
+              </button>
+              <button onClick={()=>speak('Upload a close-up selfie. We will analyze 12 skin concerns and recommend products filtered by container type.')}
+                className="btn-ghost" style={{ justifyContent:'center', fontSize:13, padding:'9px 0' }}>
+                🔊 Read instructions
               </button>
             </div>
           </div>
         </div>
 
         {/* Results */}
-        {status === 'done' && scores && (
-          <div className="space-y-8">
-            {/* Scores */}
-            <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-6 border border-brand-100/40 shadow-card">
-              <div className="flex items-center justify-between mb-5">
-                <h2 className="text-xl font-bold text-gray-900">Your Skin Analysis</h2>
-                <button onClick={() => {
-                  const top = Object.entries(scores).sort(([,a],[,b]) => (a as number)-(b as number)).slice(0,3).map(([k]) => `${CONCERN_LABELS[k]?.label}: ${scores[k]}`).join(', ')
-                  speak(`Your skin analysis results: ${top}`)
-                }} className="flex items-center gap-1.5 text-sm text-brand-600 border border-brand-200 px-3 py-1.5 rounded-lg hover:bg-brand-50 transition">
-                  <Volume2 size={14} /> Read Results
-                </button>
+        {status==='done' && scores && (
+          <div style={{ display:'flex', flexDirection:'column', gap:20 }}>
+            <div className="card" style={{ padding:24 }}>
+              <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:20 }}>
+                <div style={{ fontWeight:600, fontSize:16, color:'var(--ink)' }}>Skin Analysis Results</div>
+                <button onClick={()=>{
+                  const top = Object.entries(scores).sort(([,a],[,b])=>(a as number)-(b as number)).slice(0,3).map(([k])=>`${CONCERNS[k]}: ${scores[k]}`).join(', ')
+                  speak(`Results: ${top}`)
+                }} className="btn-ghost" style={{ fontSize:12, padding:'6px 12px' }}>🔊 Read</button>
               </div>
-
-              <div className="grid md:grid-cols-2 gap-6">
-                {overlayUrl && (
-                  <div>
-                    <div className="text-sm font-medium text-gray-500 mb-2">Skin overlay</div>
-                    <img src={overlayUrl} alt="Skin analysis overlay" className="w-full rounded-2xl" />
-                  </div>
-                )}
-                <div className="space-y-3">
-                  {Object.entries(scores).map(([key, score]) => (
-                    <div key={key}>
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="text-sm font-medium text-gray-700 flex items-center gap-1.5">
-                          {CONCERN_LABELS[key]?.icon} {CONCERN_LABELS[key]?.label || key}
-                        </span>
-                        <span className="text-sm font-bold text-gray-900">{score}/100</span>
+              <div style={{ display:'grid', gridTemplateColumns:overlay?'auto 1fr':'1fr', gap:24, alignItems:'start' }}>
+                {overlay && <img src={overlay} alt="Skin overlay" style={{ width:200, borderRadius:12 }} />}
+                <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
+                  {Object.entries(scores).map(([k,v]) => (
+                    <div key={k}>
+                      <div style={{ display:'flex', justifyContent:'space-between', fontSize:13, marginBottom:4 }}>
+                        <span style={{ color:'var(--body)' }}>{CONCERNS[k]||k}</span>
+                        <span style={{ fontWeight:600, color:'var(--ink)' }}>{v}</span>
                       </div>
-                      <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-                        <div className={`h-full rounded-full transition-all duration-700 ${getScoreColor(score as number)}`}
-                          style={{ width: `${score}%` }} />
+                      <div style={{ height:4, background:'var(--stone)', borderRadius:99, overflow:'hidden' }}>
+                        <div style={{ height:'100%', borderRadius:99, background:scoreColor(v as number), width:`${v}%`, transition:'width 0.6s ease' }} />
                       </div>
                     </div>
                   ))}
@@ -215,34 +155,21 @@ export default function BeautyPage() {
               </div>
             </div>
 
-            {/* Recommended products */}
             <div>
-              <h2 className="text-xl font-bold text-gray-900 mb-2">Recommended for you</h2>
-              <p className="text-sm text-gray-500 mb-5">Filtered by accessible containers — pump dispensers and easy-grip applicators</p>
-              <div className="grid md:grid-cols-2 gap-5">
+              <div style={{ fontWeight:600, fontSize:15, color:'var(--ink)', marginBottom:4 }}>Recommended products</div>
+              <div style={{ fontSize:13, color:'var(--muted)', marginBottom:16 }}>Filtered by accessible containers — pump dispensers, easy-grip applicators</div>
+              <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
                 {beautyProducts.map(p => (
-                  <div key={p.id} className="bg-white/80 backdrop-blur-sm rounded-2xl p-4 border border-brand-100/40 shadow-card flex gap-4">
-                    <img src={p.image} alt={p.name} className="w-20 h-20 object-cover rounded-xl flex-shrink-0" />
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-bold text-gray-900 text-sm">{p.name}</h3>
-                      <p className="text-xs text-gray-500 mt-0.5 mb-2">{p.desc}</p>
-                      <div className="flex items-center gap-2 mb-3">
-                        <span className="text-xs bg-mint-100 text-mint-700 px-2 py-0.5 rounded-full font-medium">
-                          {(p.adaptive as any)?.container_type} dispenser
-                        </span>
-                        <span className="text-xs bg-brand-100 text-brand-700 px-2 py-0.5 rounded-full font-medium">
-                          {(p.adaptive as any)?.grip_difficulty} grip
-                        </span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="font-bold text-gray-900">${p.price}</span>
-                        <button
-                          onClick={() => handleMakeupVTO(p.id)}
-                          disabled={makeupLoading}
-                          className="flex items-center gap-1 text-xs bg-gradient-to-r from-brand-600 to-blush-500 text-white px-3 py-1.5 rounded-lg font-semibold disabled:opacity-50 hover:scale-105 transition-all"
-                        >
-                          <Sparkles size={12} />
-                          {makeupLoading ? 'Loading...' : 'Try On'}
+                  <div key={p.id} className="card-inset" style={{ padding:14, display:'flex', gap:12 }}>
+                    <img src={p.image} alt={p.name} style={{ width:60, height:60, objectFit:'cover', borderRadius:8, flexShrink:0 }} />
+                    <div style={{ flex:1, minWidth:0 }}>
+                      <div style={{ fontWeight:500, fontSize:13, color:'var(--ink)' }}>{p.name}</div>
+                      <div style={{ fontSize:12, color:'var(--muted)', marginTop:2, marginBottom:8 }}>{p.desc}</div>
+                      <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+                        <span style={{ fontWeight:700, fontSize:14, color:'var(--ink)' }}>${p.price}</span>
+                        <button onClick={tryMakeup} disabled={makeupLoading}
+                          className="btn-primary" style={{ fontSize:11, padding:'5px 10px', opacity:makeupLoading?0.5:1 }}>
+                          {makeupLoading?'...':'Try on'}
                         </button>
                       </div>
                     </div>
@@ -251,21 +178,19 @@ export default function BeautyPage() {
               </div>
             </div>
 
-            {/* Makeup VTO result */}
             {makeupResult && (
-              <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-6 border border-brand-100/40 shadow-card">
-                <h2 className="text-xl font-bold text-gray-900 mb-4">Makeup Try-On Result</h2>
-                <img src={makeupResult} alt="Makeup try-on result" className="max-w-sm w-full rounded-2xl shadow-lg" />
+              <div className="card" style={{ padding:24 }}>
+                <div style={{ fontWeight:600, fontSize:15, color:'var(--ink)', marginBottom:12 }}>Makeup Try-On</div>
+                <img src={makeupResult} alt="Makeup result" style={{ maxWidth:280, width:'100%', borderRadius:12 }} />
               </div>
             )}
           </div>
         )}
 
-        {status === 'error' && (
-          <div className="bg-red-50 border border-red-200 rounded-2xl p-6 text-center">
-            <div className="text-4xl mb-2">⚠️</div>
-            <p className="text-red-600 font-medium">Something went wrong. Please try again.</p>
-            <button onClick={() => setStatus('idle')} className="mt-3 text-brand-600 underline text-sm">Reset</button>
+        {status==='error' && (
+          <div style={{ background:'#fef2f2', border:'1px solid #fecaca', borderRadius:12, padding:20, textAlign:'center' }}>
+            <div style={{ fontSize:14, color:'#dc2626' }}>Something went wrong.</div>
+            <button onClick={()=>setStatus('idle')} style={{ marginTop:8, fontSize:13, color:'var(--accent)', background:'none', border:'none', cursor:'pointer' }}>Try again</button>
           </div>
         )}
       </div>

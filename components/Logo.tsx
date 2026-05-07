@@ -1,24 +1,21 @@
-export function Logo({ size = 32 }: { size?: number }) {
+/* Conic gradient logo — inspired by ElevenLabs voice spectrum */
+export function Logo({ size = 28 }: { size?: number }) {
+  const r = size / 2
   return (
-    <svg width={size} height={size} viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="InclusiFit logo">
-      {/* Outer circle - inclusive ring */}
-      <circle cx="20" cy="20" r="18" stroke="url(#logoGrad)" strokeWidth="2.5" fill="none"/>
-      {/* Person silhouette */}
-      <circle cx="20" cy="13" r="4" fill="url(#logoGrad)"/>
-      <path d="M12 32c0-4.418 3.582-8 8-8s8 3.582 8 8" stroke="url(#logoGrad)" strokeWidth="2.5" strokeLinecap="round" fill="none"/>
-      {/* Sparkle/star - the "fit" element */}
-      <path d="M30 8 L31.2 11.2 L34.5 11.2 L31.9 13.2 L32.9 16.5 L30 14.5 L27.1 16.5 L28.1 13.2 L25.5 11.2 L28.8 11.2 Z" fill="url(#pinkGrad)" opacity="0.9"/>
+    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} fill="none" aria-hidden="true">
       <defs>
-        <linearGradient id="logoGrad" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
+        <linearGradient id="lg" x1="0" y1="0" x2={size} y2={size} gradientUnits="userSpaceOnUse">
           <stop stopColor="#7c3aed"/>
-          <stop offset="0.5" stopColor="#ec4899"/>
-          <stop offset="1" stopColor="#14b8a6"/>
-        </linearGradient>
-        <linearGradient id="pinkGrad" x1="25" y1="8" x2="35" y2="17" gradientUnits="userSpaceOnUse">
-          <stop stopColor="#f43f5e"/>
-          <stop offset="1" stopColor="#fb923c"/>
+          <stop offset="0.5" stopColor="#a855f7"/>
+          <stop offset="1" stopColor="#f43f5e"/>
         </linearGradient>
       </defs>
+      {/* Rounded square bg */}
+      <rect width={size} height={size} rx={size * 0.28} fill="url(#lg)"/>
+      {/* Person */}
+      <circle cx={r} cy={r * 0.72} r={r * 0.28} fill="white"/>
+      <path d={`M${r*0.38} ${size*0.88} Q${r*0.38} ${r*1.18} ${r} ${r*1.18} Q${r*1.62} ${r*1.18} ${r*1.62} ${size*0.88}`}
+        stroke="white" strokeWidth={size*0.09} strokeLinecap="round" fill="none"/>
     </svg>
   )
 }

@@ -2,81 +2,67 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Navbar } from '@/components/Navbar'
-import { ArrowRight, Check } from 'lucide-react'
 
 const CONDITIONS = [
-  { id: 'shorter_limbs', icon: '📏', label: 'Shorter limbs / atypical proportions', desc: 'Achondroplasia, dwarfism, limb differences', color: 'from-brand-100 to-brand-50', border: 'border-brand-300' },
-  { id: 'limited_dexterity', icon: '🤲', label: 'Limited hand / arm dexterity', desc: 'Muscular dystrophy, GNE myopathy, MS, Parkinson\'s', color: 'from-blush-100 to-blush-50', border: 'border-blush-300' },
-  { id: 'afo_user', icon: '🦿', label: 'Use ankle-foot orthosis (AFO)', desc: 'GNE myopathy, cerebral palsy, foot deformities', color: 'from-amber-100 to-amber-50', border: 'border-amber-300' },
-  { id: 'loose_fit', icon: '🧘', label: 'Prefer loose / easy-to-wear clothing', desc: 'SMA, muscle weakness, fatigue conditions', color: 'from-mint-100 to-mint-50', border: 'border-mint-300' },
-  { id: 'hair_loss', icon: '💆', label: 'Hair loss / wig shopping', desc: 'Alopecia, cancer treatment, autoimmune conditions', color: 'from-violet-100 to-violet-50', border: 'border-violet-300' },
-  { id: 'visual_impairment', icon: '👁️', label: 'Visual impairment', desc: 'Low vision, blindness, contrast sensitivity', color: 'from-sky-100 to-sky-50', border: 'border-sky-300' },
+  { id: 'shorter_limbs',     icon: '📏', label: 'Shorter limbs',         sub: 'Achondroplasia, dwarfism' },
+  { id: 'limited_dexterity', icon: '🤲', label: 'Limited dexterity',     sub: 'Muscular dystrophy, MS, Parkinson\'s' },
+  { id: 'afo_user',          icon: '🦿', label: 'AFO / brace user',      sub: 'GNE myopathy, cerebral palsy' },
+  { id: 'loose_fit',         icon: '🧘', label: 'Loose / easy-wear',     sub: 'SMA, fatigue conditions' },
+  { id: 'hair_loss',         icon: '💆', label: 'Hair loss / wigs',       sub: 'Alopecia, cancer treatment' },
+  { id: 'visual_impairment', icon: '👁️', label: 'Visual impairment',     sub: 'Low vision, blindness' },
 ]
 
 export default function ProfilePage() {
   const [selected, setSelected] = useState<string[]>([])
   const router = useRouter()
-
-  const toggle = (id: string) =>
-    setSelected(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id])
+  const toggle = (id: string) => setSelected(p => p.includes(id) ? p.filter(x => x !== id) : [...p, id])
 
   return (
-    <div className="min-h-screen animated-gradient">
+    <div style={{ background: 'var(--canvas)', minHeight: '100vh' }}>
       <Navbar />
-      <div className="max-w-2xl mx-auto px-6 pt-32 pb-20">
-        <div className="text-center mb-10">
-          <div className="inline-block bg-white/60 backdrop-blur-sm border border-brand-200/50 text-brand-700 text-sm font-semibold px-4 py-1.5 rounded-full mb-4">
-            30 seconds to set up
-          </div>
-          <h1 className="text-4xl font-extrabold text-gray-900 mb-3">Your adaptive profile</h1>
-          <p className="text-gray-500">Select all that apply. We'll auto-apply the right filters and features for you.</p>
+      <div style={{ maxWidth: 520, margin: '0 auto', padding: '120px 24px 80px' }}>
+        <div style={{ marginBottom: 32 }}>
+          <h1 className="serif" style={{ fontSize: 36, color: 'var(--ink)', marginBottom: 8 }}>Your profile</h1>
+          <p style={{ fontSize: 15, color: 'var(--muted)' }}>Select what applies. We'll filter the catalog for you.</p>
         </div>
 
-        <div className="space-y-3">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           {CONDITIONS.map(c => {
-            const isSelected = selected.includes(c.id)
+            const on = selected.includes(c.id)
             return (
-              <button
-                key={c.id}
-                onClick={() => toggle(c.id)}
-                aria-pressed={isSelected}
-                className={`w-full text-left p-5 rounded-2xl border-2 transition-all duration-200 flex items-center gap-4 group ${
-                  isSelected
-                    ? `bg-gradient-to-r ${c.color} ${c.border} shadow-card`
-                    : 'bg-white/70 backdrop-blur-sm border-gray-200/60 hover:border-brand-200 hover:shadow-card'
-                }`}
-              >
-                <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-2xl flex-shrink-0 transition-transform group-hover:scale-110 ${
-                  isSelected ? 'bg-white/60' : 'bg-gray-50'
-                }`}>
-                  {c.icon}
+              <button key={c.id} onClick={() => toggle(c.id)} aria-pressed={on}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 14, padding: '14px 16px',
+                  borderRadius: 12, border: on ? '1.5px solid #c4b5fd' : '1.5px solid var(--border)',
+                  background: on ? '#faf5ff' : 'var(--surface)',
+                  cursor: 'pointer', textAlign: 'left', transition: 'all 0.15s ease',
+                  boxShadow: on ? 'rgba(124,58,237,0.08) 0px 0px 0px 3px' : 'none',
+                }}>
+                <span style={{ fontSize: 22, width: 32, textAlign: 'center', flexShrink: 0 }}>{c.icon}</span>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: 14, fontWeight: 500, color: on ? '#5b21b6' : 'var(--ink)' }}>{c.label}</div>
+                  <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 1 }}>{c.sub}</div>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <div className="font-semibold text-gray-900">{c.label}</div>
-                  <div className="text-sm text-gray-500 mt-0.5">{c.desc}</div>
-                </div>
-                <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${
-                  isSelected ? 'bg-brand-600 border-brand-600' : 'border-gray-300'
-                }`}>
-                  {isSelected && <Check size={14} className="text-white" strokeWidth={3} />}
+                <div style={{
+                  width: 18, height: 18, borderRadius: '50%', flexShrink: 0,
+                  border: on ? 'none' : '1.5px solid var(--border)',
+                  background: on ? 'var(--accent)' : 'transparent',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}>
+                  {on && <svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4l3 3 5-6" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>}
                 </div>
               </button>
             )
           })}
         </div>
 
-        <button
-          onClick={() => router.push(`/catalog?conditions=${selected.join(',')}`)}
+        <button onClick={() => router.push(`/catalog?c=${selected.join(',')}`)}
           disabled={selected.length === 0}
-          className="mt-8 w-full flex items-center justify-center gap-2 bg-gradient-to-r from-brand-600 to-blush-500 text-white font-bold py-4 rounded-2xl shadow-lg shadow-brand-500/30 hover:shadow-brand-500/50 hover:scale-[1.02] disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100 transition-all duration-200"
-        >
-          Continue to Catalog
-          <ArrowRight size={18} />
+          className="btn-primary"
+          style={{ width: '100%', justifyContent: 'center', marginTop: 24, fontSize: 15, padding: '13px 0', opacity: selected.length === 0 ? 0.35 : 1, cursor: selected.length === 0 ? 'not-allowed' : 'pointer' }}>
+          Continue →
         </button>
-
-        <p className="text-center text-xs text-gray-400 mt-4">
-          You can always update your profile later
-        </p>
+        <p style={{ textAlign: 'center', fontSize: 12, color: 'var(--muted)', marginTop: 12 }}>You can update this anytime</p>
       </div>
     </div>
   )
